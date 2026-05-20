@@ -302,58 +302,64 @@ class _UserMissionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: UserMissionFilter.values.map((filter) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(_filterLabel(filter)),
-                  selected: viewModel.filter == filter,
-                  selectedColor: CommunityTheme.yellow,
-                  onSelected: (_) => viewModel.selectFilter(filter),
-                ),
-              );
-            }).toList(),
+    if (viewModel.isLoading && viewModel.userMissions.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return RefreshIndicator(
+      color: CommunityTheme.yellow,
+      onRefresh: viewModel.refresh,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 48,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                children: UserMissionFilter.values.map((filter) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(_filterLabel(filter)),
+                      selected: viewModel.filter == filter,
+                      selectedColor: CommunityTheme.yellow,
+                      onSelected: (_) => viewModel.selectFilter(filter),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
-        ),
-        if (viewModel.categories.isNotEmpty)
-          CommunityCategoryCarousel(
-            categories: viewModel.categories,
-            selectedId: viewModel.categoryId,
-            onSelected: viewModel.selectCategory,
-          ),
-        Expanded(
-          child: viewModel.isLoading && viewModel.userMissions.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                  color: CommunityTheme.yellow,
-                  onRefresh: viewModel.refresh,
-                  child: viewModel.userMissions.isEmpty
-                      ? ListView(
-                          children: const [
-                            SizedBox(height: 120),
-                            Center(child: Text('유저 미션이 없습니다')),
-                          ],
-                        )
-                      : ListView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: viewModel.userMissions.length,
-                          itemBuilder: (context, index) {
-                            final mission = viewModel.userMissions[index];
-                            return UserMissionCard(
-                              mission: mission,
-                              onTap: () => onMissionTap(mission.id),
-                            );
-                          },
-                        ),
-                ),
-        ),
-      ],
+          if (viewModel.categories.isNotEmpty)
+            SliverToBoxAdapter(
+              child: CommunityCategoryCarousel(
+                categories: viewModel.categories,
+                selectedId: viewModel.categoryId,
+                onSelected: viewModel.selectCategory,
+              ),
+            ),
+          if (viewModel.userMissions.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: Text('유저 미션이 없습니다')),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final mission = viewModel.userMissions[index];
+                  return UserMissionCard(
+                    mission: mission,
+                    onTap: () => onMissionTap(mission.id),
+                  );
+                },
+                childCount: viewModel.userMissions.length,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
