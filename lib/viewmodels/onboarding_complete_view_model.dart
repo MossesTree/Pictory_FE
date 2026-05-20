@@ -1,0 +1,66 @@
+import 'package:flutter/foundation.dart';
+import 'package:picktory/models/auth_session.dart';
+import 'package:picktory/services/auth_repository.dart';
+import 'package:picktory/services/signup_repository.dart';
+
+class OnboardingCompleteViewModel extends ChangeNotifier {
+  OnboardingCompleteViewModel({
+    required SignupRepository signupRepository,
+    required AuthRepository authRepository,
+  })  : _signupRepository = signupRepository,
+        _authRepository = authRepository;
+
+  final SignupRepository _signupRepository;
+  final AuthRepository _authRepository;
+
+  final String title = 'K-PICK에 오신 걸 환영해요!';
+  final String subtitle = '가입을 축하드려요';
+
+  int baseCoins = 100;
+  int bonusCoins = 0;
+  bool isCompleting = false;
+  String? errorMessage;
+
+  int get totalCoins => baseCoins + bonusCoins;
+
+  Future<void> load() async {
+    final draft = await _signupRepository.loadDraft();
+    bonusCoins = draft.inviteBonusApplied ? 100 : 0;
+    notifyListeners();
+  }
+
+  Future<bool> completeOnboarding() async {
+    isCompleting = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final draft = await _signupRepository.loadDraft();
+      await _signupRepository.completeSignup(draft);
+
+      final session = await _authRepository.getSession();
+      if (session != null) {
+        await _authRepository.saveSession(
+          AuthSession(
+            accessToken: session.accessToken,
+            isOnboardingCompleted: true,
+          ),
+        );
+      } else {
+        await _authRepository.saveSession(
+          const AuthSession(
+            accessToken: 'dummy-new-user',
+            isOnboardingCompleted: true,
+          ),
+        );
+      }
+      return true;
+    } catch (_) {
+      errorMessage = '가입 완료 처리에 실패했습니다';
+      return false;
+    } finally {
+      isCompleting = false;
+      notifyListeners();
+    }
+  }
+}
