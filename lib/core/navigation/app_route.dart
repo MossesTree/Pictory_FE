@@ -11,6 +11,7 @@ enum AppRoute {
   resetPassword('/account/reset-password'),
   home('/home'),
   ranking('/ranking'),
+  rankingGrowth('/ranking/growth'),
   community('/community'),
   benefits('/benefits'),
   my('/my'),

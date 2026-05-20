@@ -32,6 +32,7 @@ import 'package:picktory/views/home/home_view.dart';
 import 'package:picktory/views/login/login_view.dart';
 import 'package:picktory/views/shell/main_shell_view.dart';
 import 'package:picktory/views/shell/main_tab.dart';
+import 'package:picktory/views/ranking/ranking_growth_record_view.dart';
 import 'package:picktory/views/ranking/ranking_view.dart';
 import 'package:picktory/views/shell/placeholder_tab_view.dart';
 import 'package:picktory/views/signup/complete_view.dart';
@@ -281,6 +282,13 @@ class AppRouter {
               ),
             );
           },
+        ),
+        GoRoute(
+          path: AppRoute.rankingGrowth.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => RankingGrowthRecordView(
+            viewModel: locator.rankingGrowthViewModel,
+          ),
         ),
       ],
     );

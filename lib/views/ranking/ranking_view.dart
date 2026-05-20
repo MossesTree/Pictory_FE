@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:picktory/core/navigation/app_route.dart';
+import 'package:picktory/models/ranking_feed.dart';
 import 'package:picktory/services/dummy/dummy_ranking_data.dart';
 import 'package:picktory/viewmodels/ranking_view_model.dart';
-import 'package:picktory/views/ranking/widgets/ranking_activity_score_banner.dart';
-import 'package:picktory/views/ranking/widgets/ranking_list_header.dart';
-import 'package:picktory/views/ranking/widgets/ranking_list_row.dart';
 import 'package:picktory/views/ranking/widgets/ranking_main_tab_bar.dart';
 import 'package:picktory/views/ranking/widgets/ranking_my_rank_bar.dart';
-import 'package:picktory/views/ranking/widgets/ranking_period_selector.dart';
 import 'package:picktory/views/ranking/widgets/ranking_profile_sheet.dart';
-import 'package:picktory/views/ranking/widgets/ranking_top3_podium.dart';
+import 'package:picktory/views/ranking/widgets/ranking_tab_content.dart';
 
 class RankingView extends StatefulWidget {
   const RankingView({super.key, required this.viewModel});
@@ -19,33 +18,35 @@ class RankingView extends StatefulWidget {
   State<RankingView> createState() => _RankingViewState();
 }
 
-class _RankingViewState extends State<RankingView> {
-  final ScrollController _scrollController = ScrollController();
+class _RankingViewState extends State<RankingView>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
 
   RankingViewModel get viewModel => widget.viewModel;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _tabController = TabController(
+      length: RankingMainTab.values.length,
+      vsync: this,
+    );
+    _tabController.addListener(_onTabChanged);
     viewModel.load();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) {
+      return;
+    }
+    viewModel.selectMainTab(RankingMainTab.values[_tabController.index]);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    if (!_scrollController.hasClients) {
-      return;
-    }
-    final max = _scrollController.position.maxScrollExtent;
-    if (_scrollController.position.pixels >= max - 200) {
-      viewModel.loadMore();
-    }
   }
 
   Future<void> _openProfile(String userId) async {
@@ -53,17 +54,19 @@ class _RankingViewState extends State<RankingView> {
     if (!mounted || profile == null) {
       return;
     }
-    await showRankingProfileSheet(
-      context: context,
-      profile: profile,
-      onEditProfile: profile.isCurrentUser ? _onEditProfile : null,
-    );
+    await showRankingProfileSheet(context: context, profile: profile);
   }
 
-  void _onEditProfile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('프로필 수정 화면은 준비 중입니다.')),
-    );
+  void _onMyRankTap() {
+    context.push(AppRoute.rankingGrowth.path);
+  }
+
+  void _onUserTap(String userId) {
+    if (userId == DummyRankingData.currentUserId) {
+      _onMyRankTap();
+      return;
+    }
+    _openProfile(userId);
   }
 
   @override
@@ -78,128 +81,39 @@ class _RankingViewState extends State<RankingView> {
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ),
+        RankingMainTabBar(controller: _tabController),
+        if (viewModel.isRefreshing)
+          const LinearProgressIndicator(minHeight: 2),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: RankingMainTab.values
+                .map(
+                  (tab) => RankingTabContent(
+                    tab: tab,
+                    viewModel: viewModel,
+                    onUserTap: _onUserTap,
+                  ),
+                )
+                .toList(),
+          ),
+        ),
         ListenableBuilder(
           listenable: viewModel,
           builder: (context, _) {
-            return RankingMainTabBar(
-              selected: viewModel.mainTab,
-              onSelected: viewModel.selectMainTab,
+            final summary = viewModel.mySummary;
+            if (summary == null) {
+              return const SizedBox.shrink();
+            }
+            return RankingMyRankBar(
+              summary: summary,
+              mainTab: viewModel.mainTab,
+              onTap: _onMyRankTap,
+              onGrowthRecordTap: viewModel.mainTab.isMissionBased
+                  ? _onMyRankTap
+                  : null,
             );
           },
-        ),
-        Expanded(
-          child: ListenableBuilder(
-            listenable: viewModel,
-            builder: (context, _) {
-              if (viewModel.isLoading && viewModel.podium.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (viewModel.errorMessage != null && viewModel.podium.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(viewModel.errorMessage!),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: viewModel.load,
-                        child: const Text('다시 시도'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Column(
-                children: [
-                  if (viewModel.isRefreshing)
-                    const LinearProgressIndicator(minHeight: 2),
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () => viewModel.load(isRefresh: true),
-                      child: CustomScrollView(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: RankingPeriodSelector(
-                              options: viewModel.periodOptions,
-                              selectedId: viewModel.selectedPeriodId,
-                              onSelected: viewModel.selectPeriod,
-                            ),
-                          ),
-                          if (viewModel.activityScoreFormula != null)
-                            SliverToBoxAdapter(
-                              child: RankingActivityScoreBanner(
-                                formula: viewModel.activityScoreFormula!,
-                              ),
-                            ),
-                          SliverToBoxAdapter(
-                            child: RankingTop3Podium(
-                              entries: viewModel.podium,
-                              scoreLabel: viewModel.scoreColumnLabel,
-                              onUserTap: _openProfile,
-                            ),
-                          ),
-                          SliverToBoxAdapter(
-                            child: RankingListHeader(
-                              scoreLabel: viewModel.scoreColumnLabel,
-                            ),
-                          ),
-                          SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                if (index >= viewModel.entries.length) {
-                                  if (viewModel.isLoadingMore) {
-                                    return const Padding(
-                                      padding: EdgeInsets.all(16),
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  if (viewModel.hasMore) {
-                                    return const Padding(
-                                      padding: EdgeInsets.all(16),
-                                      child: Center(child: Text('· · ·')),
-                                    );
-                                  }
-                                  return null;
-                                }
-                                final entry = viewModel.entries[index];
-                                return RankingListRow(
-                                  entry: entry,
-                                  onTap: () => _openProfile(entry.userId),
-                                );
-                              },
-                              childCount: viewModel.entries.length +
-                                  (viewModel.hasMore || viewModel.isLoadingMore
-                                      ? 1
-                                      : 0),
-                            ),
-                          ),
-                          const SliverToBoxAdapter(child: SizedBox(height: 8)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (viewModel.mySummary != null)
-                    RankingMyRankBar(
-                      summary: viewModel.mySummary!,
-                      mainTab: viewModel.mainTab,
-                      onTap: () => _openProfile(DummyRankingData.currentUserId),
-                    ),
-                ],
-              );
-            },
-          ),
         ),
       ],
     );

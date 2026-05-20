@@ -1,46 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:picktory/models/ranking_feed.dart';
+import 'package:picktory/views/ranking/ranking_theme.dart';
 
 class RankingMainTabBar extends StatelessWidget {
   const RankingMainTabBar({
     super.key,
-    required this.selected,
-    required this.onSelected,
+    required this.controller,
   });
 
-  final RankingMainTab selected;
-  final ValueChanged<RankingMainTab> onSelected;
+  final TabController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: RankingMainTab.values.map((tab) {
-        final isActive = tab == selected;
-        return Expanded(
-          child: InkWell(
-            onTap: () => onSelected(tab),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: isActive ? Colors.black : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                tab.label,
-                style: TextStyle(
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                  color: isActive ? Colors.black : Colors.grey,
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+    return TabBar(
+      controller: controller,
+      labelColor: RankingTheme.primary,
+      unselectedLabelColor: RankingTheme.textSecondary,
+      indicatorColor: RankingTheme.primary,
+      indicatorWeight: 2,
+      tabs: RankingMainTab.values
+          .map((tab) => Tab(text: tab.label))
+          .toList(),
     );
   }
 }

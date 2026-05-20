@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:picktory/models/ranking_entry.dart';
-import 'package:picktory/views/ranking/widgets/ranking_badge_chip.dart';
+import 'package:picktory/views/ranking/ranking_theme.dart';
 
 class RankingTop3Podium extends StatelessWidget {
   const RankingTop3Podium({
     super.key,
     required this.entries,
-    required this.scoreLabel,
+    required this.useCommunityTitles,
     required this.onUserTap,
   });
 
   final List<RankingPodiumEntry> entries;
-  final String scoreLabel;
+  final bool useCommunityTitles;
   final ValueChanged<String> onUserTap;
 
   @override
@@ -20,52 +20,20 @@ class RankingTop3Podium extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final second = entries.firstWhere((e) => e.rank == 2, orElse: () => entries[0]);
-    final first = entries.firstWhere((e) => e.rank == 1, orElse: () => entries[1]);
-    final third = entries.firstWhere((e) => e.rank == 3, orElse: () => entries[2]);
+    final second = entries.firstWhere((e) => e.rank == 2);
+    final first = entries.firstWhere((e) => e.rank == 1);
+    final third = entries.firstWhere((e) => e.rank == 3);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text(
-            'TOP 3',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: _PodiumCard(
-                  entry: second,
-                  height: 100,
-                  scoreLabel: scoreLabel,
-                  onTap: () => onUserTap(second.userId),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _PodiumCard(
-                  entry: first,
-                  height: 130,
-                  scoreLabel: scoreLabel,
-                  onTap: () => onUserTap(first.userId),
-                  emphasize: true,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _PodiumCard(
-                  entry: third,
-                  height: 90,
-                  scoreLabel: scoreLabel,
-                  onTap: () => onUserTap(third.userId),
-                ),
-              ),
-            ],
-          ),
+          Expanded(child: _PodiumCard(entry: second, height: 88, onUserTap: onUserTap, useCommunityTitles: useCommunityTitles)),
+          const SizedBox(width: 8),
+          Expanded(child: _PodiumCard(entry: first, height: 110, onUserTap: onUserTap, emphasize: true, useCommunityTitles: useCommunityTitles)),
+          const SizedBox(width: 8),
+          Expanded(child: _PodiumCard(entry: third, height: 80, onUserTap: onUserTap, useCommunityTitles: useCommunityTitles)),
         ],
       ),
     );
@@ -76,48 +44,68 @@ class _PodiumCard extends StatelessWidget {
   const _PodiumCard({
     required this.entry,
     required this.height,
-    required this.scoreLabel,
-    required this.onTap,
+    required this.onUserTap,
+    required this.useCommunityTitles,
     this.emphasize = false,
   });
 
   final RankingPodiumEntry entry;
   final double height;
-  final String scoreLabel;
-  final VoidCallback onTap;
+  final ValueChanged<String> onUserTap;
+  final bool useCommunityTitles;
   final bool emphasize;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      onTap: () => onUserTap(entry.userId),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: height + 80,
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
+          color: emphasize ? RankingTheme.primaryLight : Colors.white,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: emphasize ? Colors.black : Colors.grey.shade300,
+            color: emphasize ? RankingTheme.primary : Colors.grey.shade300,
             width: emphasize ? 2 : 1,
           ),
-          borderRadius: BorderRadius.circular(8),
-          color: emphasize ? Colors.grey.shade50 : Colors.white,
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text('👤', style: TextStyle(fontSize: emphasize ? 28 : 22)),
-            const SizedBox(height: 4),
+            Container(
+              width: emphasize ? 52 : 44,
+              height: emphasize ? 52 : 44,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                shape: BoxShape.circle,
+                border: emphasize
+                    ? Border.all(color: RankingTheme.podiumGold, width: 2)
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: Text('👤', style: TextStyle(fontSize: emphasize ? 24 : 20)),
+            ),
+            SizedBox(height: height * 0.15),
             Text(
-              '${entry.rank}',
+              '${entry.rank}위',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: emphasize ? 18 : 14,
+                fontSize: 11,
+                color: RankingTheme.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
+            if (useCommunityTitles && entry.communityTitle != null)
+              Text(
+                entry.communityTitle!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: emphasize ? 13 : 11,
+                  fontWeight: FontWeight.bold,
+                  color: RankingTheme.primary,
+                ),
+              ),
             Text(
-              entry.isFirst ? '👑 ${entry.nickname}' : entry.nickname,
+              entry.nickname,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -127,25 +115,17 @@ class _PodiumCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            RankingBadgeChip(badge: entry.badge),
-            const SizedBox(height: 4),
             Text(
-              '${_formatScore(entry.score)}점',
+              entry.scoreLabel,
               style: TextStyle(
-                fontSize: emphasize ? 13 : 11,
+                fontSize: emphasize ? 14 : 12,
                 fontWeight: FontWeight.bold,
+                color: RankingTheme.primary,
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  String _formatScore(int score) {
-    return score.toString().replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},',
-        );
   }
 }

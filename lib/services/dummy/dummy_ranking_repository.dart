@@ -1,4 +1,5 @@
 import 'package:picktory/models/ranking_feed.dart';
+import 'package:picktory/models/ranking_growth_record.dart';
 import 'package:picktory/models/ranking_profile_preview.dart';
 import 'package:picktory/services/dummy/dummy_ranking_data.dart';
 import 'package:picktory/services/ranking_repository.dart';
@@ -22,21 +23,7 @@ class DummyRankingRepository implements RankingRepository {
           selectedPeriodId: periodId.isEmpty
               ? DummyRankingData.seasonPeriods.first.id
               : periodId,
-          hasMore: page < 2,
-        );
-      case RankingMainTab.overall:
-        return RankingFeed(
-          podium: DummyRankingData.seasonPodium(),
-          entries: DummyRankingData.seasonEntriesPage(page),
-          mySummary: DummyRankingData.seasonMySummary().copyWith(
-            topPercentTarget: 5,
-            stepsToTopPercent: 15,
-          ),
-          periodOptions: DummyRankingData.overallPeriods,
-          selectedPeriodId: periodId.isEmpty
-              ? DummyRankingData.overallPeriods.first.id
-              : periodId,
-          hasMore: page < 2,
+          hasMore: page < 1,
         );
       case RankingMainTab.community:
         return RankingFeed(
@@ -48,7 +35,20 @@ class DummyRankingRepository implements RankingRepository {
               ? DummyRankingData.communityPeriods.first.id
               : periodId,
           hasMore: page < 1,
-          activityScoreFormula: DummyRankingData.activityScoreFormula,
+          infoBannerMessage: '커뮤니티 활동 점수 지급 명칭',
+          useCommunityTitles: true,
+        );
+      case RankingMainTab.overall:
+        return RankingFeed(
+          podium: DummyRankingData.seasonPodium(),
+          entries: DummyRankingData.seasonEntriesPage(page),
+          mySummary: DummyRankingData.overallMySummary(),
+          periodOptions: DummyRankingData.overallPeriods,
+          selectedPeriodId: periodId.isEmpty
+              ? DummyRankingData.overallPeriods.first.id
+              : periodId,
+          hasMore: page < 1,
+          infoBannerMessage: '전체는 누적 포인트 정보 기준',
         );
     }
   }
@@ -61,5 +61,11 @@ class DummyRankingRepository implements RankingRepository {
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 150));
     return DummyRankingData.profileFor(userId);
+  }
+
+  @override
+  Future<RankingGrowthRecord> fetchGrowthRecord() async {
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    return DummyRankingData.growthRecord();
   }
 }

@@ -9,9 +9,15 @@ class RankingMySummary {
     required this.badge,
     required this.score,
     required this.rankChange,
-    this.topPercentTarget,
-    this.stepsToTopPercent,
-    this.accuracyPercent,
+    this.usePointsUnit = true,
+    this.currentTierName,
+    this.nextTierName,
+    this.pointsToNextTier,
+    this.tierProgressCurrent,
+    this.tierProgressMax,
+    this.topPercentile,
+    this.seasonRemainingPoints,
+    this.footerMessage,
     this.postCount,
     this.commentCount,
     this.missionCount,
@@ -23,39 +29,43 @@ class RankingMySummary {
   final RankingBadge badge;
   final int score;
   final RankingRankChange rankChange;
+  final bool usePointsUnit;
 
-  /// 시즌·전체: TOP N%까지 N계단
-  final int? topPercentTarget;
-  final int? stepsToTopPercent;
-
-  /// 시즌·전체: 적중률
-  final int? accuracyPercent;
-
-  /// 커뮤니티: 글·댓글·미션 수
+  final String? currentTierName;
+  final String? nextTierName;
+  final int? pointsToNextTier;
+  final int? tierProgressCurrent;
+  final int? tierProgressMax;
+  final int? topPercentile;
+  final int? seasonRemainingPoints;
+  final String? footerMessage;
   final int? postCount;
   final int? commentCount;
   final int? missionCount;
   final String? activitySummaryLabel;
 
-  RankingMySummary copyWith({
-    int? rank,
-    int? topPercentTarget,
-    int? stepsToTopPercent,
-    int? accuracyPercent,
-  }) {
-    return RankingMySummary(
-      rank: rank ?? this.rank,
-      nickname: nickname,
-      badge: badge,
-      score: score,
-      rankChange: rankChange,
-      topPercentTarget: topPercentTarget ?? this.topPercentTarget,
-      stepsToTopPercent: stepsToTopPercent ?? this.stepsToTopPercent,
-      accuracyPercent: accuracyPercent ?? this.accuracyPercent,
-      postCount: postCount,
-      commentCount: commentCount,
-      missionCount: missionCount,
-      activitySummaryLabel: activitySummaryLabel,
-    );
+  String get scoreLabel => usePointsUnit ? '$score pt' : '$score점';
+
+  String? get progressMessage {
+    if (footerMessage != null) {
+      return footerMessage;
+    }
+    if (nextTierName != null && pointsToNextTier != null) {
+      return '$nextTierName까지 ${pointsToNextTier}pt 남음';
+    }
+    if (topPercentile != null && seasonRemainingPoints != null) {
+      return '상위 $topPercentile% · 시즌 종료까지 ${seasonRemainingPoints}pt 남음';
+    }
+    return null;
+  }
+
+  double? get tierProgressRatio {
+    if (tierProgressCurrent == null || tierProgressMax == null) {
+      return null;
+    }
+    if (tierProgressMax == 0) {
+      return 0;
+    }
+    return (tierProgressCurrent! / tierProgressMax!).clamp(0.0, 1.0);
   }
 }

@@ -6,70 +6,111 @@ import 'package:picktory/models/ranking_period.dart';
 import 'package:picktory/models/ranking_profile_preview.dart';
 import 'package:picktory/services/ranking_repository.dart';
 
+class _RankingTabCache {
+  List<RankingPodiumEntry> podium = const [];
+  List<RankingEntry> entries = const [];
+  RankingMySummary? mySummary;
+  List<RankingPeriodOption> periodOptions = const [];
+  String selectedPeriodId = '';
+  bool hasMore = false;
+  int page = 0;
+  String? infoBannerMessage;
+  bool useCommunityTitles = false;
+  String? errorMessage;
+}
+
 class RankingViewModel extends ChangeNotifier {
   RankingViewModel({required RankingRepository rankingRepository})
       : _rankingRepository = rankingRepository;
 
   final RankingRepository _rankingRepository;
+  final Map<RankingMainTab, _RankingTabCache> _caches = {};
 
   RankingMainTab _mainTab = RankingMainTab.season;
-  String _selectedPeriodId = '';
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _isRefreshing = false;
-  String? _errorMessage;
-  List<RankingPodiumEntry> _podium = const [];
-  List<RankingEntry> _entries = const [];
-  RankingMySummary? _mySummary;
-  List<RankingPeriodOption> _periodOptions = const [];
-  bool _hasMore = false;
-  int _page = 0;
-  String? _activityScoreFormula;
 
   RankingMainTab get mainTab => _mainTab;
-  String get selectedPeriodId => _selectedPeriodId;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
   bool get isRefreshing => _isRefreshing;
-  String? get errorMessage => _errorMessage;
+
+  _RankingTabCache get _active => _caches.putIfAbsent(_mainTab, _RankingTabCache.new);
+
   List<RankingPodiumEntry> get podium =>
-      List<RankingPodiumEntry>.unmodifiable(_podium);
-  List<RankingEntry> get entries => List<RankingEntry>.unmodifiable(_entries);
-  RankingMySummary? get mySummary => _mySummary;
+      List<RankingPodiumEntry>.unmodifiable(_active.podium);
+  List<RankingEntry> get entries =>
+      List<RankingEntry>.unmodifiable(_active.entries);
+  RankingMySummary? get mySummary => _active.mySummary;
   List<RankingPeriodOption> get periodOptions =>
-      List<RankingPeriodOption>.unmodifiable(_periodOptions);
-  bool get hasMore => _hasMore;
-  String? get activityScoreFormula => _activityScoreFormula;
+      List<RankingPeriodOption>.unmodifiable(_active.periodOptions);
+  String get selectedPeriodId => _active.selectedPeriodId;
+  bool get hasMore => _active.hasMore;
+  String? get errorMessage => _active.errorMessage;
+  String? get infoBannerMessage => _active.infoBannerMessage;
+  bool get useCommunityTitles => _active.useCommunityTitles;
 
-  RankingPeriodOption? get selectedPeriod {
-    for (final option in _periodOptions) {
-      if (option.id == _selectedPeriodId) {
-        return option;
-      }
-    }
-    return _periodOptions.isNotEmpty ? _periodOptions.first : null;
-  }
+  List<RankingPodiumEntry> podiumFor(RankingMainTab tab) =>
+      List<RankingPodiumEntry>.unmodifiable(
+        _caches[tab]?.podium ?? const [],
+      );
 
-  String get scoreColumnLabel =>
-      _mainTab == RankingMainTab.community ? '활동점수' : '점수';
+  List<RankingEntry> entriesFor(RankingMainTab tab) =>
+      List<RankingEntry>.unmodifiable(_caches[tab]?.entries ?? const []);
+
+  List<RankingPeriodOption> periodOptionsFor(RankingMainTab tab) =>
+      List<RankingPeriodOption>.unmodifiable(
+        _caches[tab]?.periodOptions ?? const [],
+      );
+
+  String selectedPeriodIdFor(RankingMainTab tab) =>
+      _caches[tab]?.selectedPeriodId ?? '';
+
+  String? infoBannerFor(RankingMainTab tab) => _caches[tab]?.infoBannerMessage;
+
+  bool useCommunityTitlesFor(RankingMainTab tab) =>
+      _caches[tab]?.useCommunityTitles ?? false;
+
+  String? errorMessageFor(RankingMainTab tab) => _caches[tab]?.errorMessage;
+
+  bool hasCacheFor(RankingMainTab tab) =>
+      _caches[tab]?.podium.isNotEmpty == true;
+
+  bool isLoadingFor(RankingMainTab tab) =>
+      _isLoading && _mainTab == tab;
+
+  bool isLoadingMoreFor(RankingMainTab tab) =>
+      _isLoadingMore && _mainTab == tab;
+
+  bool hasMoreFor(RankingMainTab tab) => _caches[tab]?.hasMore ?? false;
 
   void selectMainTab(RankingMainTab tab) {
     if (_mainTab == tab) {
       return;
     }
     _mainTab = tab;
-    _selectedPeriodId = '';
-    _page = 0;
+    notifyListeners();
+    if (!hasCacheFor(tab)) {
+      load();
+    }
+  }
+
+  void selectPeriod(String periodId) {
+    if (_active.selectedPeriodId == periodId) {
+      return;
+    }
+    _active.selectedPeriodId = periodId;
+    _active.page = 0;
     notifyListeners();
     load();
   }
 
-  void selectPeriod(String periodId) {
-    if (_selectedPeriodId == periodId) {
-      return;
-    }
-    _selectedPeriodId = periodId;
-    _page = 0;
+  void selectPeriodForTab(RankingMainTab tab, String periodId) {
+    _mainTab = tab;
+    _caches.putIfAbsent(tab, _RankingTabCache.new);
+    _active.selectedPeriodId = periodId;
+    _active.page = 0;
     notifyListeners();
     load();
   }
@@ -78,24 +119,26 @@ class RankingViewModel extends ChangeNotifier {
     if (_isLoading || _isLoadingMore) {
       return;
     }
+    final cache = _caches.putIfAbsent(_mainTab, _RankingTabCache.new);
+
     if (isRefresh) {
       _isRefreshing = true;
     } else {
       _isLoading = true;
     }
-    _errorMessage = null;
-    _page = 0;
+    cache.errorMessage = null;
+    cache.page = 0;
     notifyListeners();
 
     try {
       final feed = await _rankingRepository.fetchRanking(
         tab: _mainTab,
-        periodId: _selectedPeriodId,
+        periodId: cache.selectedPeriodId,
         page: 0,
       );
-      _applyFeed(feed, resetEntries: true);
+      _applyFeed(cache, feed, resetEntries: true);
     } catch (_) {
-      _errorMessage = '랭킹 데이터를 불러오지 못했습니다.';
+      cache.errorMessage = '랭킹 데이터를 불러오지 못했습니다.';
     } finally {
       _isLoading = false;
       _isRefreshing = false;
@@ -104,22 +147,23 @@ class RankingViewModel extends ChangeNotifier {
   }
 
   Future<void> loadMore() async {
-    if (!_hasMore || _isLoading || _isLoadingMore) {
+    final cache = _active;
+    if (!cache.hasMore || _isLoading || _isLoadingMore) {
       return;
     }
     _isLoadingMore = true;
     notifyListeners();
 
     try {
-      final nextPage = _page + 1;
+      final nextPage = cache.page + 1;
       final feed = await _rankingRepository.fetchRanking(
         tab: _mainTab,
-        periodId: _selectedPeriodId,
+        periodId: cache.selectedPeriodId,
         page: nextPage,
       );
-      _page = nextPage;
-      _hasMore = feed.hasMore;
-      _entries = [..._entries, ...feed.entries];
+      cache.page = nextPage;
+      cache.hasMore = feed.hasMore;
+      cache.entries = [...cache.entries, ...feed.entries];
     } catch (_) {
       // 추가 로드 실패는 조용히 무시
     } finally {
@@ -133,21 +177,27 @@ class RankingViewModel extends ChangeNotifier {
       return await _rankingRepository.fetchProfilePreview(
         userId: userId,
         tab: _mainTab,
-        periodId: _selectedPeriodId,
+        periodId: _active.selectedPeriodId,
       );
     } catch (_) {
       return null;
     }
   }
 
-  void _applyFeed(RankingFeed feed, {required bool resetEntries}) {
-    _podium = feed.podium;
-    _entries = resetEntries ? feed.entries : [..._entries, ...feed.entries];
-    _mySummary = feed.mySummary;
-    _periodOptions = feed.periodOptions;
-    _selectedPeriodId = feed.selectedPeriodId;
-    _hasMore = feed.hasMore;
-    _activityScoreFormula = feed.activityScoreFormula;
-    _page = 0;
+  void _applyFeed(
+    _RankingTabCache cache,
+    RankingFeed feed, {
+    required bool resetEntries,
+  }) {
+    cache.podium = feed.podium;
+    cache.entries =
+        resetEntries ? feed.entries : [...cache.entries, ...feed.entries];
+    cache.mySummary = feed.mySummary;
+    cache.periodOptions = feed.periodOptions;
+    cache.selectedPeriodId = feed.selectedPeriodId;
+    cache.hasMore = feed.hasMore;
+    cache.infoBannerMessage = feed.infoBannerMessage;
+    cache.useCommunityTitles = feed.useCommunityTitles;
+    cache.page = 0;
   }
 }

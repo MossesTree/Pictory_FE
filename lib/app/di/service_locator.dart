@@ -16,6 +16,7 @@ import 'package:picktory/services/tv_program_repository.dart';
 import 'package:picktory/services/user_preference_repository.dart';
 import 'package:picktory/viewmodels/community_feed_view_model.dart';
 import 'package:picktory/viewmodels/home_view_model.dart';
+import 'package:picktory/viewmodels/ranking_growth_view_model.dart';
 import 'package:picktory/viewmodels/ranking_view_model.dart';
 
 class ServiceLocator {
@@ -34,6 +35,7 @@ class ServiceLocator {
   late final HomeViewModel homeViewModel;
   late final CommunityFeedViewModel communityFeedViewModel;
   late final RankingViewModel rankingViewModel;
+  late final RankingGrowthViewModel rankingGrowthViewModel;
 
   void init() {
     authRepository = DummyAuthRepository();
@@ -56,6 +58,9 @@ class ServiceLocator {
       communityRepository: communityRepository,
     );
     rankingViewModel = RankingViewModel(
+      rankingRepository: rankingRepository,
+    );
+    rankingGrowthViewModel = RankingGrowthViewModel(
       rankingRepository: rankingRepository,
     );
   }

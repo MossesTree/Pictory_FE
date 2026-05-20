@@ -1,4 +1,5 @@
 import 'package:picktory/models/ranking_feed.dart';
+import 'package:picktory/models/ranking_growth_record.dart';
 import 'package:picktory/models/ranking_profile_preview.dart';
 
 abstract class RankingRepository {
@@ -13,4 +14,6 @@ abstract class RankingRepository {
     required RankingMainTab tab,
     required String periodId,
   });
+
+  Future<RankingGrowthRecord> fetchGrowthRecord();
 }
