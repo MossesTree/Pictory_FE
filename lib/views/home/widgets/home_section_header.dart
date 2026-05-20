@@ -6,9 +6,11 @@ class HomeSectionHeader extends StatelessWidget {
     required this.title,
     this.actionLabel,
     this.onActionTap,
+    this.titleColor,
   });
 
   final String title;
+  final Color? titleColor;
   final String? actionLabel;
   final VoidCallback? onActionTap;
 
@@ -21,7 +23,10 @@ class HomeSectionHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: titleColor,
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
           ),
           if (actionLabel != null)

@@ -7,8 +7,12 @@ import 'package:picktory/services/dummy/dummy_signup_repository.dart';
 import 'package:picktory/services/dummy/dummy_story_repository.dart';
 import 'package:picktory/services/dummy/dummy_tv_program_repository.dart';
 import 'package:picktory/services/dummy/dummy_user_preference_repository.dart';
+import 'package:picktory/services/dummy/dummy_mission_repository.dart';
+import 'package:picktory/services/dummy/dummy_notification_repository.dart';
 import 'package:picktory/services/dummy/dummy_ranking_repository.dart';
 import 'package:picktory/services/home_repository.dart';
+import 'package:picktory/services/mission_repository.dart';
+import 'package:picktory/services/notification_repository.dart';
 import 'package:picktory/services/ranking_repository.dart';
 import 'package:picktory/services/signup_repository.dart';
 import 'package:picktory/services/story_repository.dart';
@@ -29,6 +33,8 @@ class ServiceLocator {
   late final CommunityRepository communityRepository;
   late final HomeRepository homeRepository;
   late final RankingRepository rankingRepository;
+  late final MissionRepository missionRepository;
+  late final NotificationRepository notificationRepository;
   late final StoryRepository storyRepository;
   late final TvProgramRepository tvProgramRepository;
   late final UserPreferenceRepository userPreferenceRepository;
@@ -48,6 +54,8 @@ class ServiceLocator {
       userPreferenceRepository: userPreferenceRepository,
     );
     rankingRepository = DummyRankingRepository();
+    missionRepository = DummyMissionRepository();
+    notificationRepository = DummyNotificationRepository();
     storyRepository = DummyStoryRepository();
     tvProgramRepository = DummyTvProgramRepository();
     homeViewModel = HomeViewModel(

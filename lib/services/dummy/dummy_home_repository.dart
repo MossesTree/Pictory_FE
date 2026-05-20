@@ -34,13 +34,14 @@ class DummyHomeRepository implements HomeRepository {
 
     return HomeFeed(
       nickname: displayName,
-      points: 2400,
+      points: 2450,
       hasUnreadNotifications: true,
       adBanners: DummyDataProvider.adBanners,
       heroMissions: DummyDataProvider.heroMissions,
       activeMissions: DummyDataProvider.activeMissions,
       results: DummyDataProvider.missionResults,
       hasInterestPrograms: true,
+      inlineAdTitle: '트로트스타 LOL 1위',
     );
   }
 }

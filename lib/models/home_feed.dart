@@ -12,6 +12,8 @@ class HomeFeed {
     required this.activeMissions,
     required this.results,
     required this.hasInterestPrograms,
+    this.categories = const ['전체', '드라마', '예능', '영화', '스포츠'],
+    this.inlineAdTitle,
   });
 
   final String nickname;
@@ -22,6 +24,8 @@ class HomeFeed {
   final List<Mission> activeMissions;
   final List<MissionResult> results;
   final bool hasInterestPrograms;
+  final List<String> categories;
+  final String? inlineAdTitle;
 
   static const empty = HomeFeed(
     nickname: '게스트',
@@ -32,5 +36,6 @@ class HomeFeed {
     activeMissions: [],
     results: [],
     hasInterestPrograms: false,
+    categories: ['전체', '드라마', '예능', '영화', '스포츠'],
   );
 }

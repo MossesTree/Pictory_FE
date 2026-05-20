@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:picktory/models/home_feed.dart';
+import 'package:picktory/models/mission.dart';
 import 'package:picktory/services/home_repository.dart';
 import 'package:picktory/services/user_preference_repository.dart';
 
@@ -19,11 +20,22 @@ class HomeViewModel extends ChangeNotifier {
   final String resultSectionTitle = '결과공개';
 
   HomeFeed _feed = HomeFeed.empty;
+  String _selectedCategory = '전체';
   bool _isLoading = false;
   bool _isRefreshing = false;
   String? _errorMessage;
 
   HomeFeed get feed => _feed;
+  String get selectedCategory => _selectedCategory;
+
+  List<Mission> get filteredMissions {
+    if (_selectedCategory == '전체') {
+      return _feed.activeMissions;
+    }
+    return _feed.activeMissions
+        .where((m) => m.category == _selectedCategory)
+        .toList();
+  }
   bool get isLoading => _isLoading;
   bool get isRefreshing => _isRefreshing;
   String? get errorMessage => _errorMessage;
@@ -61,4 +73,12 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void refresh() => loadFeed(isRefresh: true);
+
+  void selectCategory(String category) {
+    if (_selectedCategory == category) {
+      return;
+    }
+    _selectedCategory = category;
+    notifyListeners();
+  }
 }

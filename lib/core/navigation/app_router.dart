@@ -16,6 +16,10 @@ import 'package:picktory/viewmodels/program_selection_view_model.dart';
 import 'package:picktory/viewmodels/reset_password_view_model.dart';
 import 'package:picktory/viewmodels/splash_view_model.dart';
 import 'package:picktory/viewmodels/terms_view_model.dart';
+import 'package:picktory/viewmodels/mission_detail_view_model.dart';
+import 'package:picktory/viewmodels/mission_result_view_model.dart';
+import 'package:picktory/viewmodels/mission_share_view_model.dart';
+import 'package:picktory/viewmodels/notification_view_model.dart';
 import 'package:picktory/viewmodels/story_detail_view_model.dart';
 import 'package:picktory/viewmodels/user_mission_create_view_model.dart';
 import 'package:picktory/viewmodels/user_mission_detail_view_model.dart';
@@ -41,6 +45,10 @@ import 'package:picktory/views/signup/profile_setup_view.dart';
 import 'package:picktory/views/signup/program_selection_view.dart';
 import 'package:picktory/views/signup/terms_view.dart';
 import 'package:picktory/views/splash/splash_view.dart';
+import 'package:picktory/views/mission/mission_detail_view.dart';
+import 'package:picktory/views/mission/mission_result_view.dart';
+import 'package:picktory/views/mission/mission_share_view.dart';
+import 'package:picktory/views/notification/notification_view.dart';
 import 'package:picktory/views/story_detail/story_detail_view.dart';
 
 class AppRouter {
@@ -282,6 +290,54 @@ class AppRouter {
               ),
             );
           },
+        ),
+        GoRoute(
+          path: AppRoute.missionDetail.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final missionId = state.pathParameters['id']!;
+            return MissionDetailView(
+              viewModel: MissionDetailViewModel(
+                missionId: missionId,
+                missionRepository: locator.missionRepository,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoute.missionResult.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final missionId = state.pathParameters['id']!;
+            return MissionResultView(
+              viewModel: MissionResultViewModel(
+                missionId: missionId,
+                missionRepository: locator.missionRepository,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoute.missionShare.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final missionId = state.pathParameters['id']!;
+            return MissionShareView(
+              viewModel: MissionShareViewModel(
+                missionId: missionId,
+                missionRepository: locator.missionRepository,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoute.notifications.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => NotificationView(
+            viewModel: NotificationViewModel(
+              notificationRepository: locator.notificationRepository,
+            ),
+          ),
         ),
         GoRoute(
           path: AppRoute.rankingGrowth.path,

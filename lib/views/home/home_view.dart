@@ -3,12 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:picktory/core/navigation/app_route.dart';
 import 'package:picktory/core/navigation/app_router.dart';
 import 'package:picktory/viewmodels/home_view_model.dart';
+import 'package:picktory/views/home/home_theme.dart';
 import 'package:picktory/views/home/widgets/home_ad_banner_section.dart';
+import 'package:picktory/views/home/widgets/home_category_chips.dart';
 import 'package:picktory/views/home/widgets/home_header_bar.dart';
 import 'package:picktory/views/home/widgets/home_hero_mission_card.dart';
+import 'package:picktory/views/home/widgets/home_inline_ad_banner.dart';
 import 'package:picktory/views/home/widgets/home_mission_card.dart';
 import 'package:picktory/views/home/widgets/home_result_card.dart';
-import 'package:picktory/views/home/widgets/home_search_bar.dart';
 import 'package:picktory/views/home/widgets/home_section_header.dart';
 
 class HomeView extends StatefulWidget {
@@ -50,17 +52,29 @@ class _HomeViewState extends State<HomeView> with RouteAware {
   }
 
   void _openMissionDetail(String missionId) {
-    context.push(AppRoute.storyDetailPath(missionId));
+    context.push(AppRoute.missionDetailPath(missionId));
+  }
+
+  void _openMissionResult(String missionId) {
+    context.push(AppRoute.missionResultPath(missionId));
+  }
+
+  void _openNotifications() {
+    context.push(AppRoute.notifications.path);
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return ColoredBox(
+      color: HomeTheme.background,
+      child: SafeArea(
         child: ListenableBuilder(
           listenable: viewModel,
           builder: (context, _) {
             if (viewModel.isLoading && !viewModel.hasData) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: HomeTheme.yellow),
+              );
             }
 
             if (viewModel.errorMessage != null && !viewModel.hasData) {
@@ -68,7 +82,10 @@ class _HomeViewState extends State<HomeView> with RouteAware {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(viewModel.errorMessage!),
+                    Text(
+                      viewModel.errorMessage!,
+                      style: const TextStyle(color: HomeTheme.textPrimary),
+                    ),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: viewModel.loadFeed,
@@ -80,11 +97,13 @@ class _HomeViewState extends State<HomeView> with RouteAware {
             }
 
             final feed = viewModel.feed;
+            final missions = viewModel.filteredMissions;
 
             return Column(
               children: [
                 Expanded(
                   child: RefreshIndicator(
+                    color: HomeTheme.yellow,
                     onRefresh: () => viewModel.loadFeed(isRefresh: true),
                     child: CustomScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -98,11 +117,7 @@ class _HomeViewState extends State<HomeView> with RouteAware {
                             points: feed.points,
                             hasUnreadNotifications:
                                 feed.hasUnreadNotifications,
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: HomeSearchBar(
-                            placeholder: viewModel.searchPlaceholder,
+                            onNotificationTap: _openNotifications,
                           ),
                         ),
                         if (feed.heroMissions.isNotEmpty)
@@ -118,27 +133,32 @@ class _HomeViewState extends State<HomeView> with RouteAware {
                             ),
                           ),
                         SliverToBoxAdapter(
-                          child: HomeSectionHeader(
-                            title: viewModel.interestSectionTitle,
-                            actionLabel: feed.hasInterestPrograms
-                                ? '전체보기 ›'
-                                : null,
+                          child: HomeCategoryChips(
+                            categories: feed.categories,
+                            selected: viewModel.selectedCategory,
+                            onSelected: viewModel.selectCategory,
                           ),
                         ),
-                        if (!feed.hasInterestPrograms)
-                          SliverToBoxAdapter(
+                        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                        if (missions.isEmpty)
+                          const SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.all(24),
+                              padding: EdgeInsets.all(32),
                               child: Center(
-                                child: Text(viewModel.interestEmptyMessage),
+                                child: Text(
+                                  '해당 카테고리의 미션이 없습니다',
+                                  style: TextStyle(
+                                    color: HomeTheme.textSecondary,
+                                  ),
+                                ),
                               ),
                             ),
                           )
-                        else ...[
+                        else
                           SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
-                                final mission = feed.activeMissions[index];
+                                final mission = missions[index];
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: HomeMissionCard(
@@ -150,12 +170,20 @@ class _HomeViewState extends State<HomeView> with RouteAware {
                                   ),
                                 );
                               },
-                              childCount: feed.activeMissions.length,
+                              childCount: missions.length,
                             ),
                           ),
+                        if (feed.inlineAdTitle != null)
+                          SliverToBoxAdapter(
+                            child: HomeInlineAdBanner(
+                              title: feed.inlineAdTitle!,
+                            ),
+                          ),
+                        if (feed.results.isNotEmpty) ...[
                           SliverToBoxAdapter(
                             child: HomeSectionHeader(
                               title: viewModel.resultSectionTitle,
+                              titleColor: HomeTheme.textPrimary,
                             ),
                           ),
                           SliverList(
@@ -166,8 +194,9 @@ class _HomeViewState extends State<HomeView> with RouteAware {
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: HomeResultCard(
                                     result: result,
-                                    onTap: () =>
-                                        _openMissionDetail(result.id),
+                                    onTap: () => _openMissionResult(
+                                      'mission-hero-1',
+                                    ),
                                   ),
                                 );
                               },
@@ -181,11 +210,15 @@ class _HomeViewState extends State<HomeView> with RouteAware {
                   ),
                 ),
                 if (viewModel.isRefreshing)
-                  const LinearProgressIndicator(minHeight: 2),
+                  const LinearProgressIndicator(
+                    minHeight: 2,
+                    color: HomeTheme.yellow,
+                  ),
               ],
             );
           },
         ),
-      );
+      ),
+    );
   }
 }

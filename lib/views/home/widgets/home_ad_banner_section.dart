@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picktory/models/ad_banner.dart';
+import 'package:picktory/views/home/home_theme.dart';
 
 class HomeAdBannerSection extends StatelessWidget {
   const HomeAdBannerSection({super.key, required this.banners});
@@ -19,10 +20,10 @@ class HomeAdBannerSection extends StatelessWidget {
         itemBuilder: (context, index) {
           final banner = banners[index];
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: HomeTheme.surfaceLight,
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(16),
@@ -35,7 +36,7 @@ class HomeAdBannerSection extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black26,
+                      color: Colors.black45,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(
@@ -46,9 +47,15 @@ class HomeAdBannerSection extends StatelessWidget {
                   const Spacer(),
                   Text(
                     banner.title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: const TextStyle(
+                      color: HomeTheme.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  Text(banner.subtitle),
+                  Text(
+                    banner.subtitle,
+                    style: const TextStyle(color: HomeTheme.textSecondary),
+                  ),
                 ],
               ),
             ),

@@ -3,6 +3,7 @@ import 'package:picktory/models/gender.dart';
 import 'package:picktory/models/genre.dart';
 import 'package:picktory/models/user_profile.dart';
 import 'package:picktory/models/mission.dart';
+import 'package:picktory/models/mission_choice.dart';
 import 'package:picktory/models/mission_result.dart';
 import 'package:picktory/models/story_item.dart';
 import 'package:picktory/models/tv_program.dart';
@@ -35,33 +36,55 @@ class DummyDataProvider {
   static const List<Mission> heroMissions = [
     Mission(
       id: 'mission-hero-1',
-      programLabel: '환승연애4 5화',
+      programLabel: '환승연애4 5회',
       title: '마지막 커플은 누구?',
-      pointCost: 50,
-      remainingLabel: '02:34:12 남음',
-      participantCount: 4821,
+      pointCost: 10,
+      remainingLabel: '02:34:12',
+      participantCount: 4321,
       isUrgent: true,
+      category: '예능',
     ),
   ];
 
   static const List<Mission> activeMissions = [
     Mission(
       id: 'mission-1',
-      programLabel: '나는솔로 · 10기',
-      title: '최종 커플 1호는?',
-      pointCost: 50,
-      remainingLabel: '11:22:00 남음',
+      programLabel: '나솔16기 10회',
+      title: '최종 커플은?',
+      pointCost: 10,
+      remainingLabel: '11:22:00',
       participantCount: 2341,
-      choices: ['A. 광수 & 옥순', 'B. 상철 & 영숙'],
+      category: '예능',
+      choices: [
+        MissionChoice(id: 'a', label: 'A. 상철 & 현숙'),
+        MissionChoice(id: 'b', label: 'B. 영철 & 영자'),
+      ],
     ),
     Mission(
       id: 'mission-2',
-      programLabel: '환승연애4 · 5화',
+      programLabel: '환승연애4 5회',
       title: '마지막 커플은?',
-      pointCost: 50,
-      remainingLabel: '02:34:12 남음',
-      participantCount: 4821,
-      choices: ['A. 수지 & 현준', 'B. 민아 & 재훈'],
+      pointCost: 10,
+      remainingLabel: '02:34:12',
+      participantCount: 4321,
+      category: '예능',
+      choices: [
+        MissionChoice(id: 'a', label: 'A. 수지 & 민호'),
+        MissionChoice(id: 'b', label: 'B. 민희 & 태환'),
+      ],
+    ),
+    Mission(
+      id: 'mission-3',
+      programLabel: '흑백요리사2',
+      title: '최종 우승자는?',
+      pointCost: 10,
+      remainingLabel: '1일 05:00',
+      participantCount: 1890,
+      category: '예능',
+      choices: [
+        MissionChoice(id: 'a', label: 'A. 백수저'),
+        MissionChoice(id: 'b', label: 'B. 흑수저'),
+      ],
     ),
   ];
 

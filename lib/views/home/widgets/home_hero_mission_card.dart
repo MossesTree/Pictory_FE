@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:picktory/models/mission.dart';
-import 'package:picktory/views/widgets/wireframe_button.dart';
+import 'package:picktory/views/home/home_theme.dart';
+import 'package:picktory/views/mission/widgets/mission_yellow_button.dart';
 
 class HomeHeroMissionCard extends StatelessWidget {
   const HomeHeroMissionCard({
@@ -20,8 +21,9 @@ class HomeHeroMissionCard extends StatelessWidget {
         height: 200,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade300,
+          color: HomeTheme.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: HomeTheme.surfaceLight),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,55 +46,38 @@ class HomeHeroMissionCard extends StatelessWidget {
                     ),
                   ),
                 const Spacer(),
-                _PointBadge(points: mission.pointCost),
+                Text(
+                  '${mission.pointCost}P',
+                  style: const TextStyle(color: HomeTheme.yellow),
+                ),
               ],
             ),
             const Spacer(),
             Text(
               mission.programLabel,
-              style: Theme.of(context).textTheme.labelLarge,
+              style: const TextStyle(color: HomeTheme.textSecondary),
             ),
             Text(
               mission.title,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: const TextStyle(
+                color: HomeTheme.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               '${mission.remainingLabel} · ${mission.participantCount}명',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: const TextStyle(color: HomeTheme.textSecondary, fontSize: 12),
             ),
             const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: SizedBox(
-                width: 120,
-                child: WireframeButton(
-                  label: '참여하기',
-                  onPressed: onParticipate,
-                ),
-              ),
+            MissionYellowButton(
+              label: '참여하기',
+              onPressed: onParticipate,
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _PointBadge extends StatelessWidget {
-  const _PointBadge({required this.points});
-
-  final int points;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text('$points포인트'),
     );
   }
 }

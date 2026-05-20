@@ -21,13 +21,23 @@ enum AppRoute {
   communityReport('/community/report'),
   userMissionCreate('/community/user-missions/create'),
   userMissionDetail('/community/user-missions/:id'),
-  storyDetail('/story/:id');
+  storyDetail('/story/:id'),
+  missionDetail('/mission/:id'),
+  missionResult('/mission/:id/result'),
+  missionShare('/mission/:id/share'),
+  notifications('/notifications');
 
   const AppRoute(this.path);
 
   final String path;
 
   static String storyDetailPath(String id) => '/story/$id';
+
+  static String missionDetailPath(String id) => '/mission/$id';
+
+  static String missionResultPath(String id) => '/mission/$id/result';
+
+  static String missionSharePath(String id) => '/mission/$id/share';
 
   static String communityPostPath(String id) => '/community/post/$id';
 
