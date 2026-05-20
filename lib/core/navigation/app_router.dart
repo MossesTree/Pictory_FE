@@ -3,9 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:picktory/app/di/service_locator.dart';
 import 'package:picktory/core/navigation/app_route.dart';
 import 'package:picktory/core/navigation/main_tab_navigation.dart';
+import 'package:picktory/models/report_reason.dart';
+import 'package:picktory/viewmodels/community_compose_view_model.dart';
+import 'package:picktory/viewmodels/community_post_detail_view_model.dart';
+import 'package:picktory/viewmodels/community_report_view_model.dart';
 import 'package:picktory/viewmodels/find_id_view_model.dart';
 import 'package:picktory/viewmodels/invite_code_view_model.dart';
 import 'package:picktory/viewmodels/login_view_model.dart';
+import 'package:picktory/viewmodels/mission_suggest_view_model.dart';
 import 'package:picktory/viewmodels/onboarding_complete_view_model.dart';
 import 'package:picktory/viewmodels/profile_setup_view_model.dart';
 import 'package:picktory/viewmodels/program_selection_view_model.dart';
@@ -13,8 +18,17 @@ import 'package:picktory/viewmodels/reset_password_view_model.dart';
 import 'package:picktory/viewmodels/splash_view_model.dart';
 import 'package:picktory/viewmodels/terms_view_model.dart';
 import 'package:picktory/viewmodels/story_detail_view_model.dart';
+import 'package:picktory/viewmodels/user_mission_create_view_model.dart';
+import 'package:picktory/viewmodels/user_mission_detail_view_model.dart';
 import 'package:picktory/views/account/find_id_view.dart';
 import 'package:picktory/views/account/reset_password_view.dart';
+import 'package:picktory/views/community/community_compose_view.dart';
+import 'package:picktory/views/community/community_feed_view.dart';
+import 'package:picktory/views/community/community_post_detail_view.dart';
+import 'package:picktory/views/community/community_report_view.dart';
+import 'package:picktory/views/community/mission_suggest_view.dart';
+import 'package:picktory/views/community/user_mission_create_view.dart';
+import 'package:picktory/views/community/user_mission_detail_view.dart';
 import 'package:picktory/views/home/home_view.dart';
 import 'package:picktory/views/login/login_view.dart';
 import 'package:picktory/views/shell/main_tab.dart';
@@ -134,8 +148,8 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.community.path,
-          builder: (context, state) => PlaceholderTabView(
-            tab: MainTab.community,
+          builder: (context, state) => CommunityFeedView(
+            viewModel: locator.communityFeedViewModel,
             onTabSelected: (tab) => onTabSelected(context, tab),
           ),
         ),
@@ -152,6 +166,76 @@ class AppRouter {
             tab: MainTab.my,
             onTabSelected: (tab) => onTabSelected(context, tab),
           ),
+        ),
+        GoRoute(
+          path: AppRoute.communityPost.path,
+          builder: (context, state) {
+            final postId = state.pathParameters['id']!;
+            return CommunityPostDetailView(
+              viewModel: CommunityPostDetailViewModel(
+                postId: postId,
+                communityRepository: locator.communityRepository,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoute.communityCompose.path,
+          builder: (context, state) {
+            final editId = state.uri.queryParameters['editId'];
+            return CommunityComposeView(
+              viewModel: CommunityComposeViewModel(
+                communityRepository: locator.communityRepository,
+                editPostId: editId,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoute.communityMissionSuggest.path,
+          builder: (context, state) => MissionSuggestView(
+            viewModel: MissionSuggestViewModel(
+              communityRepository: locator.communityRepository,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.communityReport.path,
+          builder: (context, state) {
+            final typeName = state.uri.queryParameters['targetType'] ?? 'post';
+            final targetId = state.uri.queryParameters['targetId'] ?? '';
+            final targetType = ReportTargetType.values.firstWhere(
+              (e) => e.name == typeName,
+              orElse: () => ReportTargetType.post,
+            );
+            return CommunityReportView(
+              viewModel: CommunityReportViewModel(
+                communityRepository: locator.communityRepository,
+                targetType: targetType,
+                targetId: targetId,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoute.userMissionCreate.path,
+          builder: (context, state) => UserMissionCreateView(
+            viewModel: UserMissionCreateViewModel(
+              communityRepository: locator.communityRepository,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.userMissionDetail.path,
+          builder: (context, state) {
+            final missionId = state.pathParameters['id']!;
+            return UserMissionDetailView(
+              viewModel: UserMissionDetailViewModel(
+                missionId: missionId,
+                communityRepository: locator.communityRepository,
+              ),
+            );
+          },
         ),
         GoRoute(
           path: AppRoute.storyDetail.path,

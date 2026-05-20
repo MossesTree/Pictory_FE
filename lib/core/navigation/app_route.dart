@@ -11,6 +11,12 @@ enum AppRoute {
   resetPassword('/account/reset-password'),
   home('/home'),
   community('/community'),
+  communityPost('/community/post/:id'),
+  communityCompose('/community/compose'),
+  communityMissionSuggest('/community/mission-suggest'),
+  communityReport('/community/report'),
+  userMissionCreate('/community/user-missions/create'),
+  userMissionDetail('/community/user-missions/:id'),
   storyDetail('/story/:id');
 
   const AppRoute(this.path);
@@ -18,4 +24,22 @@ enum AppRoute {
   final String path;
 
   static String storyDetailPath(String id) => '/story/$id';
+
+  static String communityPostPath(String id) => '/community/post/$id';
+
+  static String communityComposePath({String? editPostId}) {
+    if (editPostId == null) {
+      return communityCompose.path;
+    }
+    return '${communityCompose.path}?editId=$editPostId';
+  }
+
+  static String communityReportPath({
+    required String targetType,
+    required String targetId,
+  }) =>
+      '${communityReport.path}?targetType=$targetType&targetId=$targetId';
+
+  static String userMissionDetailPath(String id) =>
+      '/community/user-missions/$id';
 }
