@@ -11,8 +11,9 @@ class SplashViewModel extends ChangeNotifier {
   static const Duration maxWait = Duration(milliseconds: 1500);
 
   final String appName = '픽토리';
-  final String tagline = 'Pick Your Story\n당신의 픽으로 결과를 맞혀보세요';
-  final String loadingLabel = '로딩 중...';
+  final String tagline =
+      'Pick Your Story\n당신의 픽토리 결과를 확인하세요';
+  final String loadingLabel = '데이터 로딩 중...';
 
   bool _isResolving = false;
 

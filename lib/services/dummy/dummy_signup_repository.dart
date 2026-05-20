@@ -32,7 +32,7 @@ class DummySignupRepository implements SignupRepository {
   @override
   Future<bool> validateInviteCode(String code) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    return code.toUpperCase() == 'KPICK123';
+    return code.toUpperCase() == 'PICK1';
   }
 
   @override

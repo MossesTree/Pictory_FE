@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:picktory/core/navigation/app_route.dart';
 import 'package:picktory/core/navigation/splash_destination.dart';
 import 'package:picktory/viewmodels/splash_view_model.dart';
+import 'package:picktory/views/onboarding/onboarding_theme.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key, required this.viewModel});
@@ -41,6 +42,7 @@ class _SplashViewState extends State<SplashView> {
     final viewModel = widget.viewModel;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: ListenableBuilder(
           listenable: viewModel,
@@ -51,34 +53,74 @@ class _SplashViewState extends State<SplashView> {
                 children: [
                   const Spacer(),
                   Container(
-                    width: 96,
-                    height: 96,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: OnboardingTheme.yellow,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     alignment: Alignment.center,
-                    child: const Text('K'),
+                    child: const Icon(
+                      Icons.play_arrow_rounded,
+                      size: 44,
+                      color: OnboardingTheme.black,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   Text(
                     viewModel.appName,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     viewModel.tagline,
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      color: OnboardingTheme.textSecondary,
+                    ),
                   ),
                   const Spacer(),
-                  Text(viewModel.loadingLabel),
+                  Text(
+                    viewModel.loadingLabel,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: OnboardingTheme.textSecondary,
+                    ),
+                  ),
                   const SizedBox(height: 12),
-                  const CircularProgressIndicator(),
+                  const _LoadingDots(),
                 ],
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingDots extends StatelessWidget {
+  const _LoadingDots();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(
+        3,
+        (index) => Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade400,
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );

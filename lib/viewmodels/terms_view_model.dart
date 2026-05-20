@@ -8,8 +8,8 @@ class TermsViewModel extends ChangeNotifier {
 
   final SignupRepository _signupRepository;
 
-  final String title = '나이 확인 및 약관 동의';
-  final String subtitle = '아래 항목을 확인하고 동의해주세요';
+  final String title = '서비스 이용에 동의해주세요';
+  final String subtitle = '아래 항목을 읽어보고 동의해주세요';
 
   TermsConsent _consent = const TermsConsent();
   bool isSaving = false;

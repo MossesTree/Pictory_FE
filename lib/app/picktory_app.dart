@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picktory/core/navigation/app_router.dart';
+import 'package:picktory/views/onboarding/onboarding_theme.dart';
 
 class PicktoryApp extends StatelessWidget {
   const PicktoryApp({super.key});
@@ -9,10 +10,7 @@ class PicktoryApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Picktory',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-      ),
+      theme: OnboardingTheme.themeData(),
       routerConfig: AppRouter.create(),
     );
   }

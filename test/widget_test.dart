@@ -14,9 +14,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('픽토리'), findsOneWidget);
-    expect(find.text('로딩 중...'), findsOneWidget);
+    expect(find.text('데이터 로딩 중...'), findsOneWidget);
 
-    await tester.pump(SplashViewModel.maxWait);
-    await tester.pumpAndSettle();
+    await tester.pump(SplashViewModel.maxWait + const Duration(milliseconds: 500));
+    await tester.pump();
   });
 }

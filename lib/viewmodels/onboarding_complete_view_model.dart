@@ -14,7 +14,7 @@ class OnboardingCompleteViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
 
   final String title = 'K-PICK에 오신 걸 환영해요!';
-  final String subtitle = '가입을 축하드려요';
+  final String subtitle = '가입을 축하드려요. 코인을 모아 랭킹에 도전해보세요';
 
   int baseCoins = 100;
   int bonusCoins = 0;

@@ -79,6 +79,12 @@ class DummyDataProvider {
 
   static const List<TvProgram> programs = [
     TvProgram(
+      id: 'prog-0',
+      title: '환승연애3',
+      channel: 'TVING · 시즌3',
+      category: '연애예능',
+    ),
+    TvProgram(
       id: 'prog-1',
       title: '환승연애4',
       channel: 'ENA · 시즌4',

@@ -9,18 +9,21 @@ class InviteCodeViewModel extends ChangeNotifier {
 
   final String title = '친구 초대코드';
   final String subtitle = '초대 코드가 있으면 입력해주세요';
-  final String rewardHint = '+100코인 즉시 지급!';
-  final String codeExample = 'KPICK123';
+  final String rewardTitle = '초대코드 입력 시 +100코인 즉시 지급!';
+  final String rewardSubtitle = '초대한 친구도 100코인 지급 (최대 10명)';
 
   String inviteCode = '';
   bool isApplying = false;
   String? errorMessage;
   String? successMessage;
 
-  bool get canApply => inviteCode.length == 8 && !isApplying;
+  bool get canApply => inviteCode.length == 5 && !isApplying;
 
   void updateCode(String value) {
-    inviteCode = value.toUpperCase();
+    inviteCode = value.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    if (inviteCode.length > 5) {
+      inviteCode = inviteCode.substring(0, 5);
+    }
     errorMessage = null;
     successMessage = null;
     notifyListeners();

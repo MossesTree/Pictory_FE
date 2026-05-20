@@ -10,7 +10,7 @@ class ProfileSetupViewModel extends ChangeNotifier {
   final SignupRepository _signupRepository;
 
   final String title = '프로필 설정';
-  final String subtitle = '기본 정보를 입력해주세요';
+  final String subtitle = '기본 정보를 입력해 주세요';
   final String nicknameHint = '2~12자, 특수문자 제외';
 
   UserProfile _profile = const UserProfile();

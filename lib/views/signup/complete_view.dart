@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picktory/core/navigation/app_route.dart';
 import 'package:picktory/viewmodels/onboarding_complete_view_model.dart';
-import 'package:picktory/views/widgets/wireframe_button.dart';
+import 'package:picktory/views/onboarding/onboarding_theme.dart';
+import 'package:picktory/views/onboarding/widgets/onboarding_primary_button.dart';
 
 class OnboardingCompleteView extends StatefulWidget {
   const OnboardingCompleteView({super.key, required this.viewModel});
@@ -28,54 +29,75 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> {
       listenable: viewModel,
       builder: (context, _) {
         return Scaffold(
+          backgroundColor: Colors.white,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('🎉', style: TextStyle(fontSize: 48)),
-                  const SizedBox(height: 16),
+                  const Text('🎉', style: TextStyle(fontSize: 56)),
+                  const SizedBox(height: 20),
                   Text(
                     viewModel.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  Text(viewModel.subtitle),
-                  const SizedBox(height: 24),
+                  Text(
+                    viewModel.subtitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: OnboardingTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
                   Row(
                     children: [
                       Expanded(
                         child: _CoinCard(
                           amount: '${viewModel.baseCoins}',
-                          label: '가입 보상 코인',
+                          label: '가입 보상',
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text('+', style: TextStyle(fontSize: 20)),
+                      ),
                       Expanded(
                         child: _CoinCard(
-                          amount: '+${viewModel.bonusCoins}',
+                          amount: viewModel.bonusCoins > 0
+                              ? '+${viewModel.bonusCoins}'
+                              : '+0',
                           label: '초대코드 보너스',
+                          highlight: viewModel.bonusCoins > 0,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text('총 ${viewModel.totalCoins}코인 지급 완료! 🎁'),
+                  Text(
+                    '총 ${viewModel.totalCoins}코인 지급 완료! 🎁',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                   if (viewModel.errorMessage != null) ...[
                     const SizedBox(height: 8),
                     Text(
                       viewModel.errorMessage!,
-                      style:
-                          TextStyle(color: Theme.of(context).colorScheme.error),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ],
-                  const SizedBox(height: 24),
-                  WireframeButton(
-                    label: viewModel.isCompleting
-                        ? '처리 중...'
-                        : '미션 시작하기',
+                  const SizedBox(height: 32),
+                  OnboardingPrimaryButton(
+                    label: viewModel.isCompleting ? '처리 중...' : '미션 시작하기',
                     enabled: !viewModel.isCompleting,
                     onPressed: () async {
                       final ok = await viewModel.completeOnboarding();
@@ -96,24 +118,44 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> {
 }
 
 class _CoinCard extends StatelessWidget {
-  const _CoinCard({required this.amount, required this.label});
+  const _CoinCard({
+    required this.amount,
+    required this.label,
+    this.highlight = false,
+  });
 
   final String amount;
   final String label;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade400),
+        color: highlight
+            ? OnboardingTheme.yellow.withValues(alpha: 0.4)
+            : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: highlight ? OnboardingTheme.yellow : Colors.grey.shade300,
+        ),
       ),
       child: Column(
         children: [
-          Text(amount, style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            amount,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(label, textAlign: TextAlign.center),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12),
+          ),
         ],
       ),
     );
