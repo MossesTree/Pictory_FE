@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:picktory/app/di/service_locator.dart';
 import 'package:picktory/core/navigation/app_route.dart';
 import 'package:picktory/models/report_reason.dart';
+import 'package:picktory/viewmodels/benefit_ad_watch_view_model.dart';
 import 'package:picktory/viewmodels/community_compose_view_model.dart';
 import 'package:picktory/viewmodels/community_post_detail_view_model.dart';
 import 'package:picktory/viewmodels/community_report_view_model.dart';
@@ -40,10 +41,10 @@ import 'package:picktory/views/community/user_mission_detail_view.dart';
 import 'package:picktory/views/home/home_view.dart';
 import 'package:picktory/views/login/login_view.dart';
 import 'package:picktory/views/shell/main_shell_view.dart';
-import 'package:picktory/views/shell/main_tab.dart';
 import 'package:picktory/views/ranking/ranking_growth_record_view.dart';
 import 'package:picktory/views/ranking/ranking_view.dart';
-import 'package:picktory/views/shell/placeholder_tab_view.dart';
+import 'package:picktory/views/benefits/benefit_ad_watch_view.dart';
+import 'package:picktory/views/benefits/benefits_view.dart';
 import 'package:picktory/views/signup/complete_view.dart';
 import 'package:picktory/views/signup/invite_code_view.dart';
 import 'package:picktory/views/signup/profile_setup_view.dart';
@@ -196,7 +197,7 @@ class AppRouter {
                   path: AppRoute.benefits.path,
                   pageBuilder: (context, state) => _tabPage(
                     state: state,
-                    child: const PlaceholderTabView(tab: MainTab.benefits),
+                    child: BenefitsView(viewModel: locator.benefitViewModel),
                   ),
                 ),
               ],
@@ -350,6 +351,17 @@ class AppRouter {
               notificationRepository: locator.notificationRepository,
             ),
           ),
+        ),
+        GoRoute(
+          path: AppRoute.benefitsAdWatch.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final rewardPicks = state.extra is int ? state.extra! as int : 3;
+            return BenefitAdWatchView(
+              viewModel: BenefitAdWatchViewModel(rewardPicks: rewardPicks),
+              rewardPicks: rewardPicks,
+            );
+          },
         ),
         GoRoute(
           path: AppRoute.rankingGrowth.path,

@@ -14,6 +14,7 @@ enum AppRoute {
   rankingGrowth('/ranking/growth'),
   community('/community'),
   benefits('/benefits'),
+  benefitsAdWatch('/benefits/ad-watch'),
   my('/my'),
   communityPost('/community/post/:id'),
   communityCompose('/community/compose'),

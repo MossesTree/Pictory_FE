@@ -40,6 +40,16 @@ class AppBottomNavBar extends StatelessWidget {
   }
 }
 
+Color _navLabelColor(String label, bool isActive) {
+  if (!isActive) {
+    return Colors.grey;
+  }
+  if (label == '혜택') {
+    return const Color(0xFF7C4DFF);
+  }
+  return Colors.black;
+}
+
 class _NavItem extends StatelessWidget {
   const _NavItem({
     required this.icon,
@@ -69,7 +79,7 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                color: isActive ? Colors.black : Colors.grey,
+                color: _navLabelColor(label, isActive),
               ),
             ),
           ],

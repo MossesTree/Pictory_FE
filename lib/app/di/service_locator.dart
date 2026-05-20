@@ -10,7 +10,9 @@ import 'package:picktory/services/dummy/dummy_user_preference_repository.dart';
 import 'package:picktory/services/dummy/dummy_my_repository.dart';
 import 'package:picktory/services/dummy/dummy_mission_repository.dart';
 import 'package:picktory/services/dummy/dummy_notification_repository.dart';
+import 'package:picktory/services/dummy/dummy_benefit_repository.dart';
 import 'package:picktory/services/dummy/dummy_ranking_repository.dart';
+import 'package:picktory/services/benefit_repository.dart';
 import 'package:picktory/services/home_repository.dart';
 import 'package:picktory/services/mission_repository.dart';
 import 'package:picktory/services/my_repository.dart';
@@ -24,6 +26,7 @@ import 'package:picktory/viewmodels/community_feed_view_model.dart';
 import 'package:picktory/viewmodels/home_view_model.dart';
 import 'package:picktory/viewmodels/my_view_model.dart';
 import 'package:picktory/viewmodels/ranking_growth_view_model.dart';
+import 'package:picktory/viewmodels/benefit_view_model.dart';
 import 'package:picktory/viewmodels/ranking_view_model.dart';
 
 class ServiceLocator {
@@ -42,11 +45,13 @@ class ServiceLocator {
   late final TvProgramRepository tvProgramRepository;
   late final UserPreferenceRepository userPreferenceRepository;
   late final MyRepository myRepository;
+  late final BenefitRepository benefitRepository;
   late final HomeViewModel homeViewModel;
   late final MyViewModel myViewModel;
   late final CommunityFeedViewModel communityFeedViewModel;
   late final RankingViewModel rankingViewModel;
   late final RankingGrowthViewModel rankingGrowthViewModel;
+  late final BenefitViewModel benefitViewModel;
 
   void init() {
     authRepository = DummyAuthRepository();
@@ -66,6 +71,7 @@ class ServiceLocator {
     myRepository = DummyMyRepository(
       userPreferenceRepository: userPreferenceRepository,
     );
+    benefitRepository = DummyBenefitRepository();
     homeViewModel = HomeViewModel(
       homeRepository: homeRepository,
       userPreferenceRepository: userPreferenceRepository,
@@ -80,5 +86,8 @@ class ServiceLocator {
       rankingRepository: rankingRepository,
     );
     myViewModel = MyViewModel(myRepository: myRepository);
+    benefitViewModel = BenefitViewModel(
+      benefitRepository: benefitRepository,
+    );
   }
 }
