@@ -4,8 +4,6 @@ import 'package:picktory/core/navigation/app_route.dart';
 import 'package:picktory/core/navigation/app_router.dart';
 import 'package:picktory/viewmodels/home_view_model.dart';
 import 'package:picktory/views/home/widgets/home_ad_banner_section.dart';
-import 'package:picktory/views/shell/main_shell_view.dart';
-import 'package:picktory/views/shell/main_tab.dart';
 import 'package:picktory/views/home/widgets/home_header_bar.dart';
 import 'package:picktory/views/home/widgets/home_hero_mission_card.dart';
 import 'package:picktory/views/home/widgets/home_mission_card.dart';
@@ -14,14 +12,9 @@ import 'package:picktory/views/home/widgets/home_search_bar.dart';
 import 'package:picktory/views/home/widgets/home_section_header.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({
-    super.key,
-    required this.viewModel,
-    required this.onTabSelected,
-  });
+  const HomeView({super.key, required this.viewModel});
 
   final HomeViewModel viewModel;
-  final ValueChanged<MainTab> onTabSelected;
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -62,10 +55,7 @@ class _HomeViewState extends State<HomeView> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    return MainShellView(
-      currentTab: MainTab.home,
-      onTabSelected: widget.onTabSelected,
-      body: SafeArea(
+    return SafeArea(
         child: ListenableBuilder(
           listenable: viewModel,
           builder: (context, _) {
@@ -196,7 +186,6 @@ class _HomeViewState extends State<HomeView> with RouteAware {
             );
           },
         ),
-      ),
-    );
+      );
   }
 }

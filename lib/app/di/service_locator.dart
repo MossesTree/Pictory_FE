@@ -7,13 +7,16 @@ import 'package:picktory/services/dummy/dummy_signup_repository.dart';
 import 'package:picktory/services/dummy/dummy_story_repository.dart';
 import 'package:picktory/services/dummy/dummy_tv_program_repository.dart';
 import 'package:picktory/services/dummy/dummy_user_preference_repository.dart';
+import 'package:picktory/services/dummy/dummy_ranking_repository.dart';
 import 'package:picktory/services/home_repository.dart';
+import 'package:picktory/services/ranking_repository.dart';
 import 'package:picktory/services/signup_repository.dart';
 import 'package:picktory/services/story_repository.dart';
 import 'package:picktory/services/tv_program_repository.dart';
 import 'package:picktory/services/user_preference_repository.dart';
 import 'package:picktory/viewmodels/community_feed_view_model.dart';
 import 'package:picktory/viewmodels/home_view_model.dart';
+import 'package:picktory/viewmodels/ranking_view_model.dart';
 
 class ServiceLocator {
   ServiceLocator._();
@@ -24,11 +27,13 @@ class ServiceLocator {
   late final SignupRepository signupRepository;
   late final CommunityRepository communityRepository;
   late final HomeRepository homeRepository;
+  late final RankingRepository rankingRepository;
   late final StoryRepository storyRepository;
   late final TvProgramRepository tvProgramRepository;
   late final UserPreferenceRepository userPreferenceRepository;
   late final HomeViewModel homeViewModel;
   late final CommunityFeedViewModel communityFeedViewModel;
+  late final RankingViewModel rankingViewModel;
 
   void init() {
     authRepository = DummyAuthRepository();
@@ -40,6 +45,7 @@ class ServiceLocator {
     homeRepository = DummyHomeRepository(
       userPreferenceRepository: userPreferenceRepository,
     );
+    rankingRepository = DummyRankingRepository();
     storyRepository = DummyStoryRepository();
     tvProgramRepository = DummyTvProgramRepository();
     homeViewModel = HomeViewModel(
@@ -48,6 +54,9 @@ class ServiceLocator {
     );
     communityFeedViewModel = CommunityFeedViewModel(
       communityRepository: communityRepository,
+    );
+    rankingViewModel = RankingViewModel(
+      rankingRepository: rankingRepository,
     );
   }
 }

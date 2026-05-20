@@ -9,18 +9,11 @@ import 'package:picktory/viewmodels/community_feed_view_model.dart';
 import 'package:picktory/views/community/widgets/community_action_sheet.dart';
 import 'package:picktory/views/community/widgets/community_post_card.dart';
 import 'package:picktory/views/community/widgets/user_mission_card.dart';
-import 'package:picktory/views/shell/main_shell_view.dart';
-import 'package:picktory/views/shell/main_tab.dart';
 
 class CommunityFeedView extends StatefulWidget {
-  const CommunityFeedView({
-    super.key,
-    required this.viewModel,
-    required this.onTabSelected,
-  });
+  const CommunityFeedView({super.key, required this.viewModel});
 
   final CommunityFeedViewModel viewModel;
-  final ValueChanged<MainTab> onTabSelected;
 
   @override
   State<CommunityFeedView> createState() => _CommunityFeedViewState();
@@ -87,10 +80,7 @@ class _CommunityFeedViewState extends State<CommunityFeedView>
   Widget build(BuildContext context) {
     final viewModel = widget.viewModel;
 
-    return MainShellView(
-      currentTab: MainTab.community,
-      onTabSelected: widget.onTabSelected,
-      body: ListenableBuilder(
+    return ListenableBuilder(
         listenable: viewModel,
         builder: (context, _) {
           return Stack(
@@ -139,8 +129,7 @@ class _CommunityFeedViewState extends State<CommunityFeedView>
             ],
           );
         },
-      ),
-    );
+      );
   }
 
   Future<void> _handlePostMore(String postId) async {
@@ -210,7 +199,6 @@ class _ThreadTab extends StatelessWidget {
   });
 
   final CommunityFeedViewModel viewModel;
-  final ValueChanged<MainTab> onTabSelected;
   final ValueChanged<String> onPostTap;
   final ValueChanged<String> onMoreTap;
 
@@ -247,7 +235,6 @@ class _UserMissionTab extends StatelessWidget {
   });
 
   final CommunityFeedViewModel viewModel;
-  final ValueChanged<MainTab> onTabSelected;
   final ValueChanged<String> onMissionTap;
 
   @override

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picktory/app/di/service_locator.dart';
 import 'package:picktory/core/navigation/app_route.dart';
-import 'package:picktory/core/navigation/main_tab_navigation.dart';
 import 'package:picktory/models/report_reason.dart';
 import 'package:picktory/viewmodels/community_compose_view_model.dart';
 import 'package:picktory/viewmodels/community_post_detail_view_model.dart';
@@ -31,7 +30,9 @@ import 'package:picktory/views/community/user_mission_create_view.dart';
 import 'package:picktory/views/community/user_mission_detail_view.dart';
 import 'package:picktory/views/home/home_view.dart';
 import 'package:picktory/views/login/login_view.dart';
+import 'package:picktory/views/shell/main_shell_view.dart';
 import 'package:picktory/views/shell/main_tab.dart';
+import 'package:picktory/views/ranking/ranking_view.dart';
 import 'package:picktory/views/shell/placeholder_tab_view.dart';
 import 'package:picktory/views/signup/complete_view.dart';
 import 'package:picktory/views/signup/invite_code_view.dart';
@@ -52,10 +53,6 @@ class AppRouter {
 
   static GoRouter create() {
     final locator = ServiceLocator.instance;
-
-    void onTabSelected(BuildContext context, MainTab tab) {
-      navigateMainTab(context, tab);
-    }
 
     return GoRouter(
       navigatorKey: rootNavigatorKey,
@@ -132,43 +129,73 @@ class AppRouter {
             viewModel: ResetPasswordViewModel(),
           ),
         ),
-        GoRoute(
-          path: AppRoute.home.path,
-          builder: (context, state) => HomeView(
-            viewModel: locator.homeViewModel,
-            onTabSelected: (tab) => onTabSelected(context, tab),
-          ),
-        ),
-        GoRoute(
-          path: '/ranking',
-          builder: (context, state) => PlaceholderTabView(
-            tab: MainTab.ranking,
-            onTabSelected: (tab) => onTabSelected(context, tab),
-          ),
-        ),
-        GoRoute(
-          path: AppRoute.community.path,
-          builder: (context, state) => CommunityFeedView(
-            viewModel: locator.communityFeedViewModel,
-            onTabSelected: (tab) => onTabSelected(context, tab),
-          ),
-        ),
-        GoRoute(
-          path: '/benefits',
-          builder: (context, state) => PlaceholderTabView(
-            tab: MainTab.benefits,
-            onTabSelected: (tab) => onTabSelected(context, tab),
-          ),
-        ),
-        GoRoute(
-          path: '/my',
-          builder: (context, state) => PlaceholderTabView(
-            tab: MainTab.my,
-            onTabSelected: (tab) => onTabSelected(context, tab),
-          ),
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, navigationShell) {
+            return MainShellView(navigationShell: navigationShell);
+          },
+          branches: [
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.ranking.path,
+                  pageBuilder: (context, state) => _tabPage(
+                    state: state,
+                    child: RankingView(viewModel: locator.rankingViewModel),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.community.path,
+                  pageBuilder: (context, state) => _tabPage(
+                    state: state,
+                    child: CommunityFeedView(
+                      viewModel: locator.communityFeedViewModel,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.home.path,
+                  pageBuilder: (context, state) => _tabPage(
+                    state: state,
+                    child: HomeView(viewModel: locator.homeViewModel),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.benefits.path,
+                  pageBuilder: (context, state) => _tabPage(
+                    state: state,
+                    child: const PlaceholderTabView(tab: MainTab.benefits),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.my.path,
+                  pageBuilder: (context, state) => _tabPage(
+                    state: state,
+                    child: const PlaceholderTabView(tab: MainTab.my),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         GoRoute(
           path: AppRoute.communityPost.path,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final postId = state.pathParameters['id']!;
             return CommunityPostDetailView(
@@ -181,6 +208,7 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.communityCompose.path,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final editId = state.uri.queryParameters['editId'];
             return CommunityComposeView(
@@ -193,6 +221,7 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.communityMissionSuggest.path,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => MissionSuggestView(
             viewModel: MissionSuggestViewModel(
               communityRepository: locator.communityRepository,
@@ -201,6 +230,7 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.communityReport.path,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final typeName = state.uri.queryParameters['targetType'] ?? 'post';
             final targetId = state.uri.queryParameters['targetId'] ?? '';
@@ -219,6 +249,7 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.userMissionCreate.path,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => UserMissionCreateView(
             viewModel: UserMissionCreateViewModel(
               communityRepository: locator.communityRepository,
@@ -227,6 +258,7 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.userMissionDetail.path,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final missionId = state.pathParameters['id']!;
             return UserMissionDetailView(
@@ -239,6 +271,7 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.storyDetail.path,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final storyId = state.pathParameters['id']!;
             return StoryDetailView(
@@ -250,6 +283,16 @@ class AppRouter {
           },
         ),
       ],
+    );
+  }
+
+  static NoTransitionPage<void> _tabPage({
+    required GoRouterState state,
+    required Widget child,
+  }) {
+    return NoTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
     );
   }
 }
