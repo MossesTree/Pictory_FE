@@ -5,6 +5,7 @@ import 'package:picktory/core/navigation/app_route.dart';
 import 'package:picktory/models/community_comment.dart';
 import 'package:picktory/models/community_post.dart';
 import 'package:picktory/viewmodels/community_post_detail_view_model.dart';
+import 'package:picktory/views/community/community_theme.dart';
 import 'package:picktory/views/community/widgets/community_action_sheet.dart';
 
 class CommunityPostDetailView extends StatefulWidget {
@@ -33,7 +34,7 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
     super.dispose();
   }
 
-  Future<void> _handleMore() async {
+  Future<void> _handlePostMore() async {
     final post = widget.viewModel.post;
     if (post == null) {
       return;
@@ -74,6 +75,37 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
     }
   }
 
+  Future<void> _handleCommentMore(CommunityComment comment) async {
+    final action = await showCommunityCommentActionSheet(
+      context,
+      comment: comment,
+    );
+    if (!mounted || action == null) {
+      return;
+    }
+    final repo = ServiceLocator.instance.communityRepository;
+    switch (action) {
+      case CommunityCommentAction.delete:
+        await widget.viewModel.deleteComment(comment.id);
+      case CommunityCommentAction.report:
+        await context.push(
+          AppRoute.communityReportPath(
+            targetType: 'comment',
+            targetId: comment.id,
+          ),
+        );
+      case CommunityCommentAction.block:
+        await repo.blockUser(comment.authorNickname);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('유저를 차단했습니다.')),
+          );
+        }
+      case CommunityCommentAction.edit:
+        break;
+    }
+  }
+
   Future<void> _submitComment() async {
     await widget.viewModel.submitComment();
     if (!mounted) {
@@ -94,13 +126,15 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
         final showContent = !viewModel.isLoading && post != null;
 
         return Scaffold(
+          backgroundColor: CommunityTheme.background,
           appBar: AppBar(
-            title: const Text('스레드 상세'),
+            backgroundColor: CommunityTheme.background,
+            title: Text(post?.programLabel.split('|').first.trim() ?? '스레드 상세'),
             actions: [
               if (showContent)
                 IconButton(
                   icon: const Icon(Icons.more_horiz),
-                  onPressed: _handleMore,
+                  onPressed: _handlePostMore,
                 ),
             ],
           ),
@@ -134,41 +168,226 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       children: [
-        Text(post.programLabel),
-        const SizedBox(height: 8),
+        Container(
+          height: 80,
+          margin: const EdgeInsets.only(bottom: 16),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Text(
+            '브랜드 광고 배너',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        Text(
+          post.headerLabel,
+          style: const TextStyle(
+            fontSize: 13,
+            color: CommunityTheme.textSecondary,
+          ),
+        ),
+        if (post.isMissionShare && post.linkedMissionId != null) ...[
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: () => context.push(
+              AppRoute.missionDetailPath(post.linkedMissionId!),
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: CommunityTheme.border),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(post.linkedMissionLabel ?? '공식 미션 보기 →'),
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: CommunityTheme.surface,
+              child: Text(post.displayAuthor[0]),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        post.displayAuthor,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      if (post.authorBadge != null) ...[
+                        const SizedBox(width: 6),
+                        _BadgePill(label: post.authorBadge!),
+                      ],
+                    ],
+                  ),
+                  Text(
+                    post.createdAtLabel,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: CommunityTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
         Text(
           post.title,
-          style: Theme.of(context).textTheme.titleLarge,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
         Text(post.content),
-        const SizedBox(height: 8),
-        Text('${post.displayAuthor} · ${post.createdAtLabel}'),
-        const SizedBox(height: 8),
-        Text(
-          '♡ ${post.likeCount}  □ ${post.commentCount}  👁 ${post.viewCount}',
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            InkWell(
+              onTap: viewModel.togglePostLike,
+              child: _Stat(Icons.favorite_border, post.likeCount),
+            ),
+            const SizedBox(width: 16),
+            _Stat(Icons.chat_bubble_outline, post.commentCount),
+            const SizedBox(width: 16),
+            _Stat(Icons.remove_red_eye_outlined, post.viewCount),
+          ],
         ),
         const Divider(height: 32),
-        const Text('댓글', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
+        const Text('댓글', style: TextStyle(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
         if (viewModel.comments.isEmpty)
-          const Text('아직 댓글이 없습니다.')
+          const Text(
+            '아직 댓글이 없습니다.',
+            style: TextStyle(color: CommunityTheme.textSecondary),
+          )
         else
           ...viewModel.comments.map(
             (comment) => _CommentTile(
               comment: comment,
-              onDelete: () => viewModel.deleteComment(comment.id),
-              onReport: () => context.push(
-                AppRoute.communityReportPath(
-                  targetType: 'comment',
-                  targetId: comment.id,
-                ),
-              ),
+              onMore: () => _handleCommentMore(comment),
             ),
           ),
       ],
+    );
+  }
+}
+
+class _BadgePill extends StatelessWidget {
+  const _BadgePill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: CommunityTheme.yellow.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 10)),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat(this.icon, this.count);
+
+  final IconData icon;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: CommunityTheme.textSecondary),
+        const SizedBox(width: 4),
+        Text('$count'),
+      ],
+    );
+  }
+}
+
+class _CommentTile extends StatelessWidget {
+  const _CommentTile({required this.comment, required this.onMore});
+
+  final CommunityComment comment;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: CommunityTheme.surface,
+            child: Text(comment.displayAuthor[0], style: const TextStyle(fontSize: 12)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      comment.displayAuthor,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    if (comment.authorBadge != null) ...[
+                      const SizedBox(width: 6),
+                      _BadgePill(label: comment.authorBadge!),
+                    ],
+                    const Spacer(),
+                    Text(
+                      comment.createdAtLabel,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: CommunityTheme.textSecondary,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.more_horiz, size: 18),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: onMore,
+                    ),
+                  ],
+                ),
+                Text(comment.displayContent),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.favorite_border,
+                      size: 14,
+                      color: CommunityTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text('${comment.likeCount}'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -190,22 +409,31 @@ class _CommentInputBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       elevation: 8,
+      color: CommunityTheme.background,
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const CircleAvatar(
+                radius: 16,
+                child: Icon(Icons.person, size: 16),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   controller: controller,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: '댓글 작성...',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
+                    filled: true,
+                    fillColor: CommunityTheme.surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
                       vertical: 10,
                     ),
                   ),
@@ -213,69 +441,16 @@ class _CommentInputBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              SizedBox(
-                width: 64,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: canSubmit ? onSubmit : null,
-                  child: const Text('등록'),
+              TextButton(
+                onPressed: canSubmit ? onSubmit : null,
+                child: const Text(
+                  '전송',
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _CommentTile extends StatelessWidget {
-  const _CommentTile({
-    required this.comment,
-    required this.onDelete,
-    required this.onReport,
-  });
-
-  final CommunityComment comment;
-  final VoidCallback onDelete;
-  final VoidCallback onReport;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  comment.displayAuthor,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text(comment.displayContent),
-                if (comment.isEdited)
-                  const Text(
-                    '(수정됨)',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-              ],
-            ),
-          ),
-          if (comment.isMine)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: onDelete,
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.flag_outlined),
-              onPressed: onReport,
-            ),
-        ],
       ),
     );
   }

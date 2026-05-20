@@ -15,6 +15,10 @@ class CommunityPost {
     this.isMissionShare = false,
     this.linkedMissionLabel,
     this.linkedMissionId,
+    this.categoryId = 'all',
+    this.broadcastDate,
+    this.hasPoll = false,
+    this.pollOptions = const [],
   });
 
   final String id;
@@ -32,6 +36,17 @@ class CommunityPost {
   final bool isMissionShare;
   final String? linkedMissionLabel;
   final String? linkedMissionId;
+  final String categoryId;
+  final String? broadcastDate;
+  final bool hasPoll;
+  final List<String> pollOptions;
 
   String get displayAuthor => isAnonymous ? '익명' : authorNickname;
+
+  String get headerLabel {
+    if (broadcastDate != null) {
+      return '$programLabel · $broadcastDate';
+    }
+    return programLabel;
+  }
 }

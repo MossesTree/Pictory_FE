@@ -76,6 +76,7 @@ class CommunityPostDetailViewModel extends ChangeNotifier {
 
   Future<void> togglePostLike() async {
     await _communityRepository.togglePostLike(_postId);
+    _post = await _communityRepository.fetchPostById(_postId);
     notifyListeners();
   }
 

@@ -1,7 +1,9 @@
+import 'package:picktory/models/community_category.dart';
 import 'package:picktory/models/community_comment.dart';
 import 'package:picktory/models/community_post.dart';
 import 'package:picktory/models/report_reason.dart';
 import 'package:picktory/models/user_mission.dart';
+import 'package:picktory/models/user_mission_choice_stat.dart';
 import 'package:picktory/services/community_repository.dart';
 import 'package:picktory/services/dummy/dummy_community_data.dart';
 
@@ -19,11 +21,21 @@ class DummyCommunityRepository implements CommunityRepository {
   final Set<String> _blockedUsers = {};
 
   @override
-  Future<List<CommunityPost>> fetchThreadPosts() async {
+  Future<List<CommunityCategory>> fetchCategories() async {
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    return DummyCommunityData.categories;
+  }
+
+  @override
+  Future<List<CommunityPost>> fetchThreadPosts({String? categoryId}) async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
-    return _posts
+    var results = _posts
         .where((p) => !_blockedUsers.contains(p.authorNickname))
         .toList();
+    if (categoryId != null && categoryId != 'all') {
+      results = results.where((p) => p.categoryId == categoryId).toList();
+    }
+    return results;
   }
 
   @override
@@ -49,9 +61,14 @@ class DummyCommunityRepository implements CommunityRepository {
   Future<List<UserMission>> fetchUserMissions({
     UserMissionFilter filter = UserMissionFilter.all,
     UserMissionSort sort = UserMissionSort.latest,
+    String? categoryId,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
     var results = List<UserMission>.from(_userMissions);
+
+    if (categoryId != null && categoryId != 'all') {
+      results = results.where((m) => m.categoryId == categoryId).toList();
+    }
 
     switch (filter) {
       case UserMissionFilter.active:
@@ -135,22 +152,27 @@ class DummyCommunityRepository implements CommunityRepository {
     if (index < 0) {
       throw StateError('post not found');
     }
+    final old = _posts[index];
     final updated = CommunityPost(
       id: id,
-      authorNickname: _posts[index].authorNickname,
-      authorBadge: _posts[index].authorBadge,
+      authorNickname: old.authorNickname,
+      authorBadge: old.authorBadge,
       programLabel: programLabel,
       title: title,
       content: content,
-      likeCount: _posts[index].likeCount,
-      commentCount: _posts[index].commentCount,
-      viewCount: _posts[index].viewCount,
-      createdAtLabel: '${_posts[index].createdAtLabel} (수정됨)',
+      likeCount: old.likeCount,
+      commentCount: old.commentCount,
+      viewCount: old.viewCount,
+      createdAtLabel: '${old.createdAtLabel} (수정됨)',
       isMine: true,
       isAnonymous: !showNickname,
-      isMissionShare: _posts[index].isMissionShare,
-      linkedMissionLabel: _posts[index].linkedMissionLabel,
-      linkedMissionId: _posts[index].linkedMissionId,
+      isMissionShare: old.isMissionShare,
+      linkedMissionLabel: old.linkedMissionLabel,
+      linkedMissionId: old.linkedMissionId,
+      categoryId: old.categoryId,
+      broadcastDate: old.broadcastDate,
+      hasPoll: old.hasPoll,
+      pollOptions: old.pollOptions,
     );
     _posts[index] = updated;
     return updated;
@@ -198,6 +220,10 @@ class DummyCommunityRepository implements CommunityRepository {
         isMissionShare: post.isMissionShare,
         linkedMissionLabel: post.linkedMissionLabel,
         linkedMissionId: post.linkedMissionId,
+        categoryId: post.categoryId,
+        broadcastDate: post.broadcastDate,
+        hasPoll: post.hasPoll,
+        pollOptions: post.pollOptions,
       );
     }
     return comment;
@@ -254,12 +280,41 @@ class DummyCommunityRepository implements CommunityRepository {
 
   @override
   Future<void> togglePostLike(String postId) async {
-    if (_likedPosts.contains(postId)) {
+    final index = _posts.indexWhere((p) => p.id == postId);
+    if (index < 0) {
+      return;
+    }
+    final post = _posts[index];
+    final liked = _likedPosts.contains(postId);
+    if (liked) {
       _likedPosts.remove(postId);
     } else {
       _likedPosts.add(postId);
     }
+    _posts[index] = CommunityPost(
+      id: post.id,
+      authorNickname: post.authorNickname,
+      authorBadge: post.authorBadge,
+      programLabel: post.programLabel,
+      title: post.title,
+      content: post.content,
+      likeCount: post.likeCount + (liked ? -1 : 1),
+      commentCount: post.commentCount,
+      viewCount: post.viewCount,
+      createdAtLabel: post.createdAtLabel,
+      isMine: post.isMine,
+      isAnonymous: post.isAnonymous,
+      isMissionShare: post.isMissionShare,
+      linkedMissionLabel: post.linkedMissionLabel,
+      linkedMissionId: post.linkedMissionId,
+      categoryId: post.categoryId,
+      broadcastDate: post.broadcastDate,
+      hasPoll: post.hasPoll,
+      pollOptions: post.pollOptions,
+    );
   }
+
+  bool isPostLiked(String postId) => _likedPosts.contains(postId);
 
   @override
   Future<void> toggleCommentLike(String commentId) async {
@@ -290,10 +345,103 @@ class DummyCommunityRepository implements CommunityRepository {
   Future<void> submitMissionSuggestion({
     required String title,
     required String programLabel,
+    required String episode,
     required String description,
     required List<String> choices,
+    String? expectedCloseLabel,
+    String? resultSource,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
+  }
+
+  @override
+  Future<UserMission> participateUserMission({
+    required String missionId,
+    required int choiceIndex,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    final index = _userMissions.indexWhere((m) => m.id == missionId);
+    if (index < 0) {
+      throw StateError('mission not found');
+    }
+    final mission = _userMissions[index];
+    if (choiceIndex < 0 || choiceIndex >= mission.choices.length) {
+      throw ArgumentError('invalid choice');
+    }
+    final selected = mission.choices[choiceIndex];
+
+    if (mission.isPollType) {
+      final stats = _buildPollStats(mission.choices, choiceIndex);
+      final updated = UserMission(
+        id: mission.id,
+        type: mission.type,
+        title: mission.title,
+        authorNickname: mission.authorNickname,
+        authorBadge: mission.authorBadge,
+        programLabel: mission.programLabel,
+        status: mission.status,
+        remainingLabel: mission.remainingLabel,
+        pointCost: mission.pointCost,
+        likeCount: mission.likeCount,
+        commentCount: mission.commentCount,
+        viewCount: mission.viewCount,
+        participantCount: mission.participantCount + 1,
+        createdAtLabel: mission.createdAtLabel,
+        isMine: mission.isMine,
+        choices: mission.choices,
+        description: mission.description,
+        categoryId: mission.categoryId,
+        choiceStats: stats,
+        userSelectedChoice: selected,
+        hasParticipated: true,
+      );
+      _userMissions[index] = updated;
+      return updated;
+    }
+
+    final updated = UserMission(
+      id: mission.id,
+      type: mission.type,
+      title: mission.title,
+      authorNickname: mission.authorNickname,
+      authorBadge: mission.authorBadge,
+      programLabel: mission.programLabel,
+      status: mission.status,
+      remainingLabel: mission.remainingLabel,
+      pointCost: mission.pointCost,
+      likeCount: mission.likeCount,
+      commentCount: mission.commentCount,
+      viewCount: mission.viewCount,
+      participantCount: mission.participantCount + 1,
+      createdAtLabel: mission.createdAtLabel,
+      isMine: mission.isMine,
+      choices: mission.choices,
+      description: mission.description,
+      categoryId: mission.categoryId,
+      userSelectedChoice: selected,
+      hasParticipated: true,
+    );
+    _userMissions[index] = updated;
+    return updated;
+  }
+
+  List<UserMissionChoiceStat> _buildPollStats(
+    List<String> choices,
+    int selectedIndex,
+  ) {
+    final percents = switch (choices.length) {
+      2 => [56, 44],
+      3 => [56, 32, 12],
+      _ => List<int>.generate(choices.length, (i) => 100 ~/ choices.length),
+    };
+    return List<UserMissionChoiceStat>.generate(
+      choices.length,
+      (i) => UserMissionChoiceStat(
+        label: choices[i],
+        percent: percents[i.clamp(0, percents.length - 1)],
+        isUserChoice: i == selectedIndex,
+      ),
+    );
   }
 
   @override

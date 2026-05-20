@@ -43,7 +43,7 @@ class _MissionDetailViewState extends State<MissionDetailView> {
       builder: (sheetContext) {
         return ListenableBuilder(
           listenable: viewModel,
-          builder: (_, __) {
+          builder: (_, _) {
             return MissionConfirmSheet(
               selectedLabel: label,
               notifyOnResult: viewModel.notifyOnResult,
@@ -51,7 +51,9 @@ class _MissionDetailViewState extends State<MissionDetailView> {
               isSubmitting: viewModel.isSubmitting,
               onShare: () {
                 Navigator.of(sheetContext).pop();
-                context.push(AppRoute.missionSharePath(viewModel.detail!.mission.id));
+                context.push(
+                  AppRoute.missionSharePath(viewModel.detail!.mission.id),
+                );
               },
               onHome: () {
                 Navigator.of(sheetContext).pop();
@@ -170,19 +172,22 @@ class _MissionDetailViewState extends State<MissionDetailView> {
                       children: [
                         Text(
                           '참여수 ${mission.participantCount}명',
-                          style: const TextStyle(color: HomeTheme.textSecondary),
+                          style: const TextStyle(
+                            color: HomeTheme.textSecondary,
+                          ),
                         ),
                         const Spacer(),
                         Text(
                           '총 포인트 ${detail.totalPointPool}',
-                          style: const TextStyle(color: HomeTheme.textSecondary),
+                          style: const TextStyle(
+                            color: HomeTheme.textSecondary,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
                     ...detail.options.map((option) {
-                      final selected =
-                          viewModel.selectedChoiceId == option.id;
+                      final selected = viewModel.selectedChoiceId == option.id;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: InkWell(
@@ -233,7 +238,9 @@ class _MissionDetailViewState extends State<MissionDetailView> {
                         ),
                         subtitle: Text(
                           m.programLabel,
-                          style: const TextStyle(color: HomeTheme.textSecondary),
+                          style: const TextStyle(
+                            color: HomeTheme.textSecondary,
+                          ),
                         ),
                         trailing: const Icon(
                           Icons.chevron_right,

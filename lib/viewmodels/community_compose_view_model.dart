@@ -21,9 +21,12 @@ class CommunityComposeViewModel extends ChangeNotifier {
   String? errorMessage;
 
   bool get isEditMode => _editPostId != null;
+  static const int maxContentLength = 500;
+
   bool get canSubmit =>
       title.trim().isNotEmpty &&
       content.trim().isNotEmpty &&
+      content.length <= maxContentLength &&
       !isSubmitting;
 
   Future<void> loadForEdit() async {
@@ -57,7 +60,9 @@ class CommunityComposeViewModel extends ChangeNotifier {
   }
 
   void updateContent(String value) {
-    content = value;
+    content = value.length > maxContentLength
+        ? value.substring(0, maxContentLength)
+        : value;
     notifyListeners();
   }
 

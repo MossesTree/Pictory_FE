@@ -7,11 +7,15 @@ class MissionSuggestViewModel extends ChangeNotifier {
 
   final CommunityRepository _communityRepository;
 
-  String programLabel = '환승연애4 · 5화';
+  String programLabel = '환승연애4';
+  String episode = '';
   String title = '';
   String description = '';
   String choiceA = '';
   String choiceB = '';
+  String choiceC = '';
+  String expectedCloseLabel = '';
+  String resultSource = '';
   bool isSubmitting = false;
   String? errorMessage;
   bool isSuccess = false;
@@ -24,6 +28,11 @@ class MissionSuggestViewModel extends ChangeNotifier {
 
   void updateProgram(String value) {
     programLabel = value;
+    notifyListeners();
+  }
+
+  void updateEpisode(String value) {
+    episode = value;
     notifyListeners();
   }
 
@@ -47,6 +56,21 @@ class MissionSuggestViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateChoiceC(String value) {
+    choiceC = value;
+    notifyListeners();
+  }
+
+  void updateExpectedClose(String value) {
+    expectedCloseLabel = value;
+    notifyListeners();
+  }
+
+  void updateResultSource(String value) {
+    resultSource = value;
+    notifyListeners();
+  }
+
   Future<bool> submit() async {
     if (!canSubmit) {
       return false;
@@ -56,11 +80,21 @@ class MissionSuggestViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final choices = [
+        choiceA.trim(),
+        choiceB.trim(),
+        if (choiceC.trim().isNotEmpty) choiceC.trim(),
+      ];
       await _communityRepository.submitMissionSuggestion(
         title: title.trim(),
         programLabel: programLabel,
+        episode: episode.trim(),
         description: description.trim(),
-        choices: [choiceA.trim(), choiceB.trim()],
+        choices: choices,
+        expectedCloseLabel:
+            expectedCloseLabel.trim().isEmpty ? null : expectedCloseLabel.trim(),
+        resultSource:
+            resultSource.trim().isEmpty ? null : resultSource.trim(),
       );
       isSuccess = true;
       return true;

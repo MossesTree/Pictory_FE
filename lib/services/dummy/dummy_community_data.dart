@@ -1,27 +1,39 @@
+import 'package:picktory/models/community_category.dart';
 import 'package:picktory/models/community_comment.dart';
 import 'package:picktory/models/community_post.dart';
 import 'package:picktory/models/user_mission.dart';
+import 'package:picktory/models/user_mission_choice_stat.dart';
 
 class DummyCommunityData {
-  static final List<CommunityPost> posts = [
-    const CommunityPost(
+  static const categories = [
+    CommunityCategory(id: 'all', label: 'ALL'),
+    CommunityCategory(id: 'transfer4', label: '환승연애4'),
+    CommunityCategory(id: 'solo', label: '나는솔로'),
+    CommunityCategory(id: 'produce', label: '프로듀스'),
+    CommunityCategory(id: 'chef', label: '흑백요리사'),
+  ];
+
+  static const List<CommunityPost> posts = [
+    CommunityPost(
       id: 'post-1',
-      authorNickname: '예능러버88',
-      authorBadge: '미션마스터',
-      programLabel: '환승연애4 · 5화',
-      title: '5화 마지막 커플 예측 정리',
-      content: '저는 수지&현준 조합이 제일 자연스러웠어요. 다들 픽 공유해요!',
-      likeCount: 42,
-      commentCount: 9,
-      viewCount: 1204,
-      createdAtLabel: '2시간 전',
+      authorNickname: '별빛이용자',
+      authorBadge: 'Gold',
+      programLabel: '환승연애4 | 5회',
+      title: '5화 봤어요?? 수지 선택 예상했는데...',
+      content: '저는 A 선택했어요! 댓글 바꿔야 할 것 같아요 ㅠㅠ',
+      likeCount: 24,
+      commentCount: 98,
+      viewCount: 1400,
+      createdAtLabel: '5분 전',
       isMine: false,
+      categoryId: 'transfer4',
+      broadcastDate: '2024.03.15 방영',
     ),
-    const CommunityPost(
+    CommunityPost(
       id: 'post-2',
       authorNickname: '강아지#123',
-      authorBadge: '미션마스터',
-      programLabel: '환승연애4 · 5화',
+      authorBadge: 'Gold',
+      programLabel: '환승연애4 | 5회',
       title: '공유한 미션: 5화 마지막 커플',
       content: '미션 결과 기다리는 중입니다. A vs B 고민돼요.',
       likeCount: 18,
@@ -30,13 +42,14 @@ class DummyCommunityData {
       createdAtLabel: '5시간 전',
       isMine: true,
       isMissionShare: true,
-      linkedMissionLabel: '5화 마지막 커플 →',
+      linkedMissionLabel: '공식 미션: 5화 마지막 커플 →',
       linkedMissionId: 'mission-hero-1',
+      categoryId: 'transfer4',
     ),
-    const CommunityPost(
+    CommunityPost(
       id: 'post-3',
       authorNickname: '익명',
-      programLabel: '나는솔로 · 10기',
+      programLabel: '나는솔로 | 10기',
       title: '10기 최종 커플 라인업',
       content: '개인적으로 2호 커플이 우승할 것 같아요.',
       likeCount: 7,
@@ -45,6 +58,25 @@ class DummyCommunityData {
       createdAtLabel: '어제',
       isMine: false,
       isAnonymous: true,
+      categoryId: 'solo',
+      hasPoll: true,
+      pollOptions: ['A. 1호 커플', 'B. 2호 커플', 'C. 3호 커플'],
+    ),
+    CommunityPost(
+      id: 'post-4',
+      authorNickname: '예능러버88',
+      authorBadge: 'Silver',
+      programLabel: '프로듀스101 | 6화',
+      title: '6화 1위 예측 투표',
+      content: '이번 주 무대 어땠나요?',
+      likeCount: 31,
+      commentCount: 12,
+      viewCount: 890,
+      createdAtLabel: '3시간 전',
+      isMine: false,
+      categoryId: 'produce',
+      hasPoll: true,
+      pollOptions: ['A. 김하준', 'B. 박서진', 'C. 이준호'],
     ),
   ];
 
@@ -54,24 +86,36 @@ class DummyCommunityData {
         id: 'cmt-1',
         postId: 'post-1',
         authorNickname: '예능러버88',
+        authorBadge: 'Silver',
         content: '저도 수지 선택했어요! 맞길...',
-        createdAtLabel: '1시간 전',
+        createdAtLabel: '15분 전',
         likeCount: 3,
         isMine: false,
       ),
       const CommunityComment(
         id: 'cmt-2',
         postId: 'post-1',
-        authorNickname: '강아지#123',
+        authorNickname: '미션마스터',
+        authorBadge: 'Master',
         content: '현준 라인 설득력 있네요',
-        createdAtLabel: '30분 전',
+        createdAtLabel: '32분 전',
         likeCount: 1,
+        isMine: false,
+      ),
+      const CommunityComment(
+        id: 'cmt-3',
+        postId: 'post-1',
+        authorNickname: '강아지#123',
+        authorBadge: 'Gold',
+        content: '결과 나오면 공유할게요',
+        createdAtLabel: '1시간 전',
+        likeCount: 0,
         isMine: true,
       ),
     ],
     'post-2': [
       const CommunityComment(
-        id: 'cmt-3',
+        id: 'cmt-4',
         postId: 'post-2',
         authorNickname: '강아지#123',
         content: '결과 나오면 공유할게요',
@@ -86,12 +130,12 @@ class DummyCommunityData {
     const UserMission(
       id: 'um-1',
       type: UserMissionType.mission,
-      title: '5화 엔딩 커플 최종 픽',
+      title: '5화 OST 주인공은?',
       authorNickname: '미션마스터',
-      authorBadge: '미션마스터',
+      authorBadge: 'Gold',
       programLabel: '환승연애4 · 5화',
       status: UserMissionStatus.active,
-      remainingLabel: '02:34:12 남음',
+      remainingLabel: '마감까지 05:30:00',
       pointCost: 50,
       likeCount: 42,
       commentCount: 9,
@@ -99,7 +143,8 @@ class DummyCommunityData {
       participantCount: 234,
       createdAtLabel: '3시간 전',
       isMine: false,
-      choices: ['A. 수지 & 현준', 'B. 민아 & 재훈'],
+      categoryId: 'transfer4',
+      choices: ['A. 수지 & 현준', 'B. 민아 & 재훈', 'C. 기타'],
       description: '👤 유저가 만든 미션 · 부적절한 내용은 신고',
     ),
     const UserMission(
@@ -107,6 +152,7 @@ class DummyCommunityData {
       type: UserMissionType.poll,
       title: '오늘 방송 최고 명장면은?',
       authorNickname: '픽덕후',
+      authorBadge: 'Bronze',
       programLabel: '나는솔로 · 10기',
       status: UserMissionStatus.active,
       likeCount: 28,
@@ -115,7 +161,13 @@ class DummyCommunityData {
       participantCount: 156,
       createdAtLabel: '6시간 전',
       isMine: true,
-      choices: ['A. 첫만남', 'B. 데이트'],
+      categoryId: 'solo',
+      choices: ['A. 첫만남', 'B. 데이트', 'C. 고백'],
+      choiceStats: [
+        UserMissionChoiceStat(label: 'A. 첫만남', percent: 56),
+        UserMissionChoiceStat(label: 'B. 데이트', percent: 32),
+        UserMissionChoiceStat(label: 'C. 고백', percent: 12),
+      ],
       description: '👤 유저가 만든 투표 · 부적절 내용 신고',
     ),
     const UserMission(
@@ -133,6 +185,7 @@ class DummyCommunityData {
       participantCount: 88,
       createdAtLabel: '2일 전',
       isMine: true,
+      categoryId: 'produce',
       choices: ['A. 김하준', 'B. 박서진'],
     ),
   ];

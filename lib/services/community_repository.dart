@@ -1,10 +1,13 @@
+import 'package:picktory/models/community_category.dart';
 import 'package:picktory/models/community_comment.dart';
 import 'package:picktory/models/community_post.dart';
 import 'package:picktory/models/report_reason.dart';
 import 'package:picktory/models/user_mission.dart';
 
 abstract class CommunityRepository {
-  Future<List<CommunityPost>> fetchThreadPosts();
+  Future<List<CommunityPost>> fetchThreadPosts({String? categoryId});
+
+  Future<List<CommunityCategory>> fetchCategories();
 
   Future<CommunityPost?> fetchPostById(String id);
 
@@ -13,6 +16,7 @@ abstract class CommunityRepository {
   Future<List<UserMission>> fetchUserMissions({
     UserMissionFilter filter,
     UserMissionSort sort,
+    String? categoryId,
   });
 
   Future<UserMission?> fetchUserMissionById(String id);
@@ -62,8 +66,16 @@ abstract class CommunityRepository {
   Future<void> submitMissionSuggestion({
     required String title,
     required String programLabel,
+    required String episode,
     required String description,
     required List<String> choices,
+    String? expectedCloseLabel,
+    String? resultSource,
+  });
+
+  Future<UserMission> participateUserMission({
+    required String missionId,
+    required int choiceIndex,
   });
 
   Future<UserMission> createUserMission({

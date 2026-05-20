@@ -7,6 +7,7 @@ class CommunityComment {
     required this.createdAtLabel,
     required this.likeCount,
     required this.isMine,
+    this.authorBadge,
     this.isAnonymous = false,
     this.isEdited = false,
     this.isDeleted = false,
@@ -15,6 +16,7 @@ class CommunityComment {
   final String id;
   final String postId;
   final String authorNickname;
+  final String? authorBadge;
   final String content;
   final String createdAtLabel;
   final int likeCount;

@@ -102,7 +102,7 @@ class _MissionShareViewState extends State<MissionShareView> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: viewModel.category,
+                      initialValue: viewModel.category,
                       dropdownColor: HomeTheme.surface,
                       style: const TextStyle(color: HomeTheme.textPrimary),
                       decoration: InputDecoration(

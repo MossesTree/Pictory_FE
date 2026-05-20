@@ -30,7 +30,7 @@ class MissionDetailViewModel extends ChangeNotifier {
 
   String get submitButtonLabel {
     final cost = _detail?.mission.pointCost ?? 10;
-    return '선택 후 ${cost}포인트 차감';
+    return '선택 후 $cost포인트 차감';
   }
 
   String? get selectedChoiceLabel {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picktory/models/user_mission.dart';
+import 'package:picktory/views/community/community_theme.dart';
 
 class UserMissionCard extends StatelessWidget {
   const UserMissionCard({
@@ -13,45 +14,89 @@ class UserMissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: CommunityTheme.border),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  _TypeBadge(mission: mission),
-                  const SizedBox(width: 8),
-                  _StatusBadge(status: mission.status),
+                  _TypeBadge(isMission: mission.isMissionType),
+                  const SizedBox(width: 6),
+                  _StatusBadge(isActive: mission.isActive),
+                  const SizedBox(width: 6),
+                  if (mission.authorBadge != null)
+                    _TierBadge(label: mission.authorBadge!),
                   const Spacer(),
-                  Text(mission.authorNickname),
+                  Text(
+                    mission.authorNickname,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(mission.programLabel),
+              Text(
+                mission.programLabel,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: CommunityTheme.textSecondary,
+                ),
+              ),
               Text(
                 mission.title,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              if (mission.remainingLabel != null) ...[
-                const SizedBox(height: 4),
-                Text(mission.remainingLabel!),
+              if (mission.choices.length >= 2) ...[
+                const SizedBox(height: 8),
+                Text(
+                  mission.choices.take(2).join('  ·  '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: CommunityTheme.textSecondary,
+                  ),
+                ),
               ],
-              const SizedBox(height: 8),
+              if (mission.remainingLabel != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  mission.remainingLabel!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: CommunityTheme.yellow,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Text('♡ ${mission.likeCount}'),
-                  const SizedBox(width: 8),
-                  Text('👤 ${mission.participantCount}'),
-                  const SizedBox(width: 8),
-                  Text('□ ${mission.commentCount}'),
-                  const SizedBox(width: 8),
-                  Text('👁 ${mission.viewCount}'),
+                  _Stat(Icons.favorite_border, mission.likeCount),
+                  const SizedBox(width: 10),
+                  _Stat(Icons.chat_bubble_outline, mission.commentCount),
+                  const SizedBox(width: 10),
+                  _Stat(Icons.remove_red_eye_outlined, mission.viewCount),
+                  const Spacer(),
+                  Text(
+                    mission.createdAtLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: CommunityTheme.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -63,32 +108,77 @@ class UserMissionCard extends StatelessWidget {
 }
 
 class _TypeBadge extends StatelessWidget {
-  const _TypeBadge({required this.mission});
+  const _TypeBadge({required this.isMission});
 
-  final UserMission mission;
+  final bool isMission;
 
   @override
   Widget build(BuildContext context) {
-    final label = mission.isMissionType ? '미션형' : '투표형';
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
+        color: isMission ? CommunityTheme.yellow : CommunityTheme.surface,
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Text(label, style: const TextStyle(fontSize: 11)),
+      child: Text(
+        isMission ? '미션형' : '투표형',
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
+      ),
     );
   }
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
+  const _StatusBadge({required this.isActive});
 
-  final UserMissionStatus status;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
-    final label = status == UserMissionStatus.active ? '진행중' : '마감';
-    return Text(label, style: const TextStyle(fontSize: 11));
+    return Text(
+      isActive ? '진행중' : '마감',
+      style: TextStyle(
+        fontSize: 10,
+        color: isActive ? Colors.green.shade700 : CommunityTheme.textSecondary,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+class _TierBadge extends StatelessWidget {
+  const _TierBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: CommunityTheme.surface,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 10)),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat(this.icon, this.count);
+
+  final IconData icon;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: CommunityTheme.textSecondary),
+        const SizedBox(width: 3),
+        Text('$count', style: const TextStyle(fontSize: 11)),
+      ],
+    );
   }
 }

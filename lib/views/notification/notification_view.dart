@@ -35,19 +35,17 @@ class _NotificationViewState extends State<NotificationView> {
           body: viewModel.isLoading
               ? const Center(child: CircularProgressIndicator())
               : viewModel.isEmpty
-                  ? _EmptyState(
-                      onGoMissions: () => context.go(AppRoute.home.path),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: viewModel.items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        return _NotificationTile(
-                          notification: viewModel.items[index],
-                        );
-                      },
-                    ),
+              ? _EmptyState(onGoMissions: () => context.go(AppRoute.home.path))
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: viewModel.items.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    return _NotificationTile(
+                      notification: viewModel.items[index],
+                    );
+                  },
+                ),
         );
       },
     );
@@ -82,10 +80,7 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            MissionYellowButton(
-              label: '미션 보러가기',
-              onPressed: onGoMissions,
-            ),
+            MissionYellowButton(label: '미션 보러가기', onPressed: onGoMissions),
           ],
         ),
       ),

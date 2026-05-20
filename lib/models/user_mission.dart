@@ -1,3 +1,5 @@
+import 'package:picktory/models/user_mission_choice_stat.dart';
+
 enum UserMissionType { mission, poll }
 
 enum UserMissionStatus { active, closed }
@@ -25,6 +27,10 @@ class UserMission {
     this.pointCost = 0,
     this.choices = const [],
     this.description = '',
+    this.categoryId = 'all',
+    this.choiceStats = const [],
+    this.userSelectedChoice,
+    this.hasParticipated = false,
   });
 
   final String id;
@@ -44,7 +50,12 @@ class UserMission {
   final bool isMine;
   final List<String> choices;
   final String description;
+  final String categoryId;
+  final List<UserMissionChoiceStat> choiceStats;
+  final String? userSelectedChoice;
+  final bool hasParticipated;
 
   bool get isMissionType => type == UserMissionType.mission;
   bool get isPollType => type == UserMissionType.poll;
+  bool get isActive => status == UserMissionStatus.active;
 }

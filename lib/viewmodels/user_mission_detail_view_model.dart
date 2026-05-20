@@ -13,12 +13,33 @@ class UserMissionDetailViewModel extends ChangeNotifier {
   final CommunityRepository _communityRepository;
 
   bool _isLoading = false;
+  bool _isSubmitting = false;
   String? _errorMessage;
   UserMission? _mission;
+  int? _selectedChoiceIndex;
 
   bool get isLoading => _isLoading;
+  bool get isSubmitting => _isSubmitting;
   String? get errorMessage => _errorMessage;
   UserMission? get mission => _mission;
+  int? get selectedChoiceIndex => _selectedChoiceIndex;
+
+  bool get canParticipate =>
+      _mission != null &&
+      _mission!.isActive &&
+      !_mission!.hasParticipated &&
+      _selectedChoiceIndex != null &&
+      !_isSubmitting;
+
+  String get participateButtonLabel {
+    if (_mission == null) {
+      return '선택';
+    }
+    if (_mission!.isMissionType && _mission!.pointCost > 0) {
+      return '선택 후 ${_mission!.pointCost}포인트 차감';
+    }
+    return '선택';
+  }
 
   Future<void> load() async {
     _isLoading = true;
@@ -38,7 +59,36 @@ class UserMissionDetailViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleLike() async {
+  void selectChoice(int index) {
+    if (_mission == null || _mission!.hasParticipated) {
+      return;
+    }
+    _selectedChoiceIndex = index;
     notifyListeners();
+  }
+
+  Future<bool> participate() async {
+    final index = _selectedChoiceIndex;
+    if (!canParticipate || index == null) {
+      return false;
+    }
+
+    _isSubmitting = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _mission = await _communityRepository.participateUserMission(
+        missionId: _missionId,
+        choiceIndex: index,
+      );
+      return true;
+    } catch (_) {
+      _errorMessage = '참여에 실패했습니다.';
+      return false;
+    } finally {
+      _isSubmitting = false;
+      notifyListeners();
+    }
   }
 }
