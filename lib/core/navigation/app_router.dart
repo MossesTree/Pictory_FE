@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picktory/app/di/service_locator.dart';
 import 'package:picktory/core/navigation/app_route.dart';
+import 'package:picktory/core/navigation/main_tab_navigation.dart';
 import 'package:picktory/viewmodels/find_id_view_model.dart';
 import 'package:picktory/viewmodels/invite_code_view_model.dart';
 import 'package:picktory/viewmodels/login_view_model.dart';
@@ -14,7 +15,10 @@ import 'package:picktory/viewmodels/terms_view_model.dart';
 import 'package:picktory/viewmodels/story_detail_view_model.dart';
 import 'package:picktory/views/account/find_id_view.dart';
 import 'package:picktory/views/account/reset_password_view.dart';
+import 'package:picktory/views/home/home_view.dart';
 import 'package:picktory/views/login/login_view.dart';
+import 'package:picktory/views/shell/main_tab.dart';
+import 'package:picktory/views/shell/placeholder_tab_view.dart';
 import 'package:picktory/views/signup/complete_view.dart';
 import 'package:picktory/views/signup/invite_code_view.dart';
 import 'package:picktory/views/signup/profile_setup_view.dart';
@@ -34,6 +38,10 @@ class AppRouter {
 
   static GoRouter create() {
     final locator = ServiceLocator.instance;
+
+    void onTabSelected(BuildContext context, MainTab tab) {
+      navigateMainTab(context, tab);
+    }
 
     return GoRouter(
       navigatorKey: rootNavigatorKey,
@@ -112,8 +120,37 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoute.home.path,
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text('홈')),
+          builder: (context, state) => HomeView(
+            viewModel: locator.homeViewModel,
+            onTabSelected: (tab) => onTabSelected(context, tab),
+          ),
+        ),
+        GoRoute(
+          path: '/ranking',
+          builder: (context, state) => PlaceholderTabView(
+            tab: MainTab.ranking,
+            onTabSelected: (tab) => onTabSelected(context, tab),
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.community.path,
+          builder: (context, state) => PlaceholderTabView(
+            tab: MainTab.community,
+            onTabSelected: (tab) => onTabSelected(context, tab),
+          ),
+        ),
+        GoRoute(
+          path: '/benefits',
+          builder: (context, state) => PlaceholderTabView(
+            tab: MainTab.benefits,
+            onTabSelected: (tab) => onTabSelected(context, tab),
+          ),
+        ),
+        GoRoute(
+          path: '/my',
+          builder: (context, state) => PlaceholderTabView(
+            tab: MainTab.my,
+            onTabSelected: (tab) => onTabSelected(context, tab),
           ),
         ),
         GoRoute(

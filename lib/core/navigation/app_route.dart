@@ -10,6 +10,7 @@ enum AppRoute {
   findId('/account/find-id'),
   resetPassword('/account/reset-password'),
   home('/home'),
+  community('/community'),
   storyDetail('/story/:id');
 
   const AppRoute(this.path);
