@@ -25,7 +25,13 @@ enum AppRoute {
   missionDetail('/mission/:id'),
   missionResult('/mission/:id/result'),
   missionShare('/mission/:id/share'),
-  notifications('/notifications');
+  notifications('/notifications'),
+  myPickHistory('/my/pick-history'),
+  myCommunityActivity('/my/community-activity'),
+  myBadges('/my/badges'),
+  myInterestedPrograms('/my/interested-programs'),
+  settings('/settings'),
+  notificationSettings('/settings/notifications');
 
   const AppRoute(this.path);
 

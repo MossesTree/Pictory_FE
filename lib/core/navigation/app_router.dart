@@ -19,6 +19,11 @@ import 'package:picktory/viewmodels/terms_view_model.dart';
 import 'package:picktory/viewmodels/mission_detail_view_model.dart';
 import 'package:picktory/viewmodels/mission_result_view_model.dart';
 import 'package:picktory/viewmodels/mission_share_view_model.dart';
+import 'package:picktory/viewmodels/my_community_activity_view_model.dart';
+import 'package:picktory/viewmodels/my_interested_programs_view_model.dart';
+import 'package:picktory/viewmodels/my_pick_history_view_model.dart';
+import 'package:picktory/viewmodels/my_special_badges_view_model.dart';
+import 'package:picktory/viewmodels/notification_settings_view_model.dart';
 import 'package:picktory/viewmodels/notification_view_model.dart';
 import 'package:picktory/viewmodels/story_detail_view_model.dart';
 import 'package:picktory/viewmodels/user_mission_create_view_model.dart';
@@ -48,6 +53,13 @@ import 'package:picktory/views/splash/splash_view.dart';
 import 'package:picktory/views/mission/mission_detail_view.dart';
 import 'package:picktory/views/mission/mission_result_view.dart';
 import 'package:picktory/views/mission/mission_share_view.dart';
+import 'package:picktory/views/my/my_community_activity_view.dart';
+import 'package:picktory/views/my/my_interested_programs_view.dart';
+import 'package:picktory/views/my/my_pick_history_view.dart';
+import 'package:picktory/views/my/my_special_badges_view.dart';
+import 'package:picktory/views/my/my_view.dart';
+import 'package:picktory/views/my/notification_settings_view.dart';
+import 'package:picktory/views/my/settings_view.dart';
 import 'package:picktory/views/notification/notification_view.dart';
 import 'package:picktory/views/story_detail/story_detail_view.dart';
 
@@ -195,7 +207,7 @@ class AppRouter {
                   path: AppRoute.my.path,
                   pageBuilder: (context, state) => _tabPage(
                     state: state,
-                    child: const PlaceholderTabView(tab: MainTab.my),
+                    child: MyView(viewModel: locator.myViewModel),
                   ),
                 ),
               ],
@@ -344,6 +356,57 @@ class AppRouter {
           parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => RankingGrowthRecordView(
             viewModel: locator.rankingGrowthViewModel,
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.myPickHistory.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => MyPickHistoryView(
+            viewModel: MyPickHistoryViewModel(
+              myRepository: locator.myRepository,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.myCommunityActivity.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => MyCommunityActivityView(
+            viewModel: MyCommunityActivityViewModel(
+              myRepository: locator.myRepository,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.myBadges.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => MySpecialBadgesView(
+            viewModel: MySpecialBadgesViewModel(
+              myRepository: locator.myRepository,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.myInterestedPrograms.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => MyInterestedProgramsView(
+            viewModel: MyInterestedProgramsViewModel(
+              userPreferenceRepository: locator.userPreferenceRepository,
+              tvProgramRepository: locator.tvProgramRepository,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoute.settings.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const SettingsView(),
+        ),
+        GoRoute(
+          path: AppRoute.notificationSettings.path,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => NotificationSettingsView(
+            viewModel: NotificationSettingsViewModel(
+              myRepository: locator.myRepository,
+            ),
           ),
         ),
       ],
