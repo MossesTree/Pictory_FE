@@ -144,7 +144,8 @@ class _ProgramSelectionViewState extends State<ProgramSelectionView> {
               if (!context.mounted || !ok) {
                 return;
               }
-              context.go(AppRoute.signupInvite.path);
+              // IA: 관심 프로그램 → 가입 완료 (초대코드는 O-4에 통합됨)
+              context.go(AppRoute.signupComplete.path);
             },
           ),
         );

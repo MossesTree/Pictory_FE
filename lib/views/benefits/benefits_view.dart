@@ -90,10 +90,9 @@ class _BenefitsViewState extends State<BenefitsView> with RouteAware {
     }
   }
 
+  /// IA B-5: 미니게임 카드 탭 시 서브페이지로 이동
   void _onMiniGameTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('미니게임은 곧 오픈 예정이에요.')),
-    );
+    context.push(AppRoute.benefitsMiniGames.path);
   }
 
   @override
@@ -149,14 +148,17 @@ class _BenefitsViewState extends State<BenefitsView> with RouteAware {
                               BenefitSectionCard(
                                 title: '출석체크',
                                 subtitle: '매일 출석하면 Pick을 드려요',
-                                trailing: Text(
-                                  viewModel.attendanceStreakLabel,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: BenefitTheme.primary,
-                                  ),
-                                ),
+                                trailing: viewModel.attendanceStreakLabel ==
+                                        null
+                                    ? null
+                                    : Text(
+                                        viewModel.attendanceStreakLabel!,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: BenefitTheme.primary,
+                                        ),
+                                      ),
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,

@@ -1,5 +1,6 @@
 import 'package:picktory/models/home_feed.dart';
 import 'package:picktory/services/dummy/dummy_data_provider.dart';
+import 'package:picktory/services/dummy/dummy_home_programs.dart';
 import 'package:picktory/services/home_repository.dart';
 import 'package:picktory/services/user_preference_repository.dart';
 
@@ -17,7 +18,7 @@ class DummyHomeRepository implements HomeRepository {
     final preference = await _userPreferenceRepository.load();
     final ids = programIds ?? preference.selectedProgramIds;
     final nickname = preference.profile?.nickname ?? '강아지';
-    final displayName = '$nickname#123';
+    final displayName = '$nickname입니다';
 
     if (ids.isEmpty) {
       return HomeFeed(
@@ -25,22 +26,26 @@ class DummyHomeRepository implements HomeRepository {
         points: 0,
         hasUnreadNotifications: false,
         adBanners: DummyDataProvider.adBanners,
+        noticeBanners: DummyDataProvider.noticeBanners,
         heroMissions: const [],
         activeMissions: const [],
         results: const [],
         hasInterestPrograms: false,
+        programs: DummyHomePrograms.items,
       );
     }
 
     return HomeFeed(
       nickname: displayName,
-      points: 2450,
+      points: 2400,
       hasUnreadNotifications: true,
       adBanners: DummyDataProvider.adBanners,
+      noticeBanners: DummyDataProvider.noticeBanners,
       heroMissions: DummyDataProvider.heroMissions,
       activeMissions: DummyDataProvider.activeMissions,
       results: DummyDataProvider.missionResults,
       hasInterestPrograms: true,
+      programs: DummyHomePrograms.items,
       inlineAdTitle: '트로트스타 LOL 1위',
     );
   }

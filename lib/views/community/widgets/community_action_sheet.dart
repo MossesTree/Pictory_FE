@@ -9,6 +9,7 @@ enum CommunityPostAction {
   report,
   block,
   share,
+  viewMission,
 }
 
 enum CommunityCommentAction {
@@ -16,6 +17,12 @@ enum CommunityCommentAction {
   delete,
   report,
   block,
+}
+
+enum CommunityFeedMoreAction {
+  refresh,
+  notifications,
+  notice,
 }
 
 Future<CommunityPostAction?> showCommunityPostActionSheet(
@@ -60,10 +67,59 @@ Future<CommunityPostAction?> showCommunityPostActionSheet(
                     Navigator.pop(context, CommunityPostAction.block),
               ),
             ],
+            if (post.isMissionShare && post.linkedMissionId != null)
+              _ActionTile(
+                icon: Icons.emoji_events_outlined,
+                label: '원본 미션 보기',
+                onTap: () => Navigator.pop(
+                  context,
+                  CommunityPostAction.viewMission,
+                ),
+              ),
             _ActionTile(
               icon: Icons.link,
               label: '링크 복사',
               onTap: () => Navigator.pop(context, CommunityPostAction.share),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+/// IA C-1 헤더 더보기 시트
+Future<CommunityFeedMoreAction?> showCommunityFeedMoreSheet(
+  BuildContext context,
+) {
+  return showModalBottomSheet<CommunityFeedMoreAction>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return _ActionSheetContainer(
+        title: '더보기',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _ActionTile(
+              icon: Icons.refresh,
+              label: '새로고침',
+              onTap: () =>
+                  Navigator.pop(context, CommunityFeedMoreAction.refresh),
+            ),
+            _ActionTile(
+              icon: Icons.notifications_none,
+              label: '알림 보기',
+              onTap: () => Navigator.pop(
+                context,
+                CommunityFeedMoreAction.notifications,
+              ),
+            ),
+            _ActionTile(
+              icon: Icons.campaign_outlined,
+              label: '공지사항',
+              onTap: () =>
+                  Navigator.pop(context, CommunityFeedMoreAction.notice),
             ),
           ],
         ),

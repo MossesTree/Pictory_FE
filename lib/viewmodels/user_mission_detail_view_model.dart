@@ -41,6 +41,10 @@ class UserMissionDetailViewModel extends ChangeNotifier {
     return '선택';
   }
 
+  /// IA UM-4 → C-2: 이 유저 미션과 연결된 스레드 ID
+  /// Phase 3 서버 연동 전까지 첫 더미 게시물(post-1)로 라우팅
+  String get relatedPostId => 'post-1';
+
   Future<void> load() async {
     _isLoading = true;
     _errorMessage = null;

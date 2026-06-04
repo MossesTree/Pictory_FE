@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:picktory/views/home/home_theme.dart';
+import 'package:picktory/views/mission/mission_theme.dart';
 
+/// 미션·결과·공유 화면 공통 스캐폴드 (Figma 524:3397 라이트 테마 기준)
 class MissionScaffold extends StatelessWidget {
   const MissionScaffold({
     super.key,
@@ -20,11 +21,21 @@ class MissionScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HomeTheme.background,
+      backgroundColor: MissionTheme.background,
       appBar: AppBar(
-        backgroundColor: HomeTheme.background,
-        foregroundColor: HomeTheme.textPrimary,
-        title: Text(title),
+        backgroundColor: MissionTheme.background,
+        foregroundColor: MissionTheme.textPrimary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: MissionTheme.textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         leading: leading,
         actions: actions,
       ),

@@ -1,6 +1,7 @@
 import 'package:picktory/models/community_category.dart';
 import 'package:picktory/models/community_comment.dart';
 import 'package:picktory/models/community_post.dart';
+import 'package:picktory/models/community_post_kind.dart';
 import 'package:picktory/models/report_reason.dart';
 import 'package:picktory/models/user_mission.dart';
 import 'package:picktory/models/user_mission_choice_stat.dart';
@@ -476,5 +477,51 @@ class DummyCommunityRepository implements CommunityRepository {
     );
     _userMissions.insert(0, mission);
     return mission;
+  }
+
+  @override
+  Future<ComposeSubmitResult> submitCompose({
+    required CommunityPostKind kind,
+    required String category,
+    required String programLabel,
+    required String episode,
+    required List<String> imageAssetIds,
+    String title = '',
+    String content = '',
+    List<String> choices = const [],
+    String? deadlineLabel,
+    bool showNickname = true,
+  }) async {
+    final compositeProgramLabel =
+        episode.isEmpty ? programLabel : '$programLabel · $episode';
+    switch (kind) {
+      case CommunityPostKind.thread:
+        final post = await createPost(
+          programLabel: compositeProgramLabel,
+          title: title,
+          content: content,
+          showNickname: showNickname,
+        );
+        return ComposeSubmitResult(kind: kind, id: post.id);
+      case CommunityPostKind.userMission:
+        final mission = await createUserMission(
+          type: UserMissionType.mission,
+          title: title,
+          programLabel: compositeProgramLabel,
+          description: content,
+          choices: choices,
+          deadlineLabel: deadlineLabel,
+        );
+        return ComposeSubmitResult(kind: kind, id: mission.id);
+      case CommunityPostKind.userPoll:
+        final mission = await createUserMission(
+          type: UserMissionType.poll,
+          title: title,
+          programLabel: compositeProgramLabel,
+          description: content,
+          choices: choices,
+        );
+        return ComposeSubmitResult(kind: kind, id: mission.id);
+    }
   }
 }

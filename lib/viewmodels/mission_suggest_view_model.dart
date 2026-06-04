@@ -1,73 +1,98 @@
 import 'package:flutter/foundation.dart';
+import 'package:picktory/core/widgets/program_episode_picker.dart';
 import 'package:picktory/services/community_repository.dart';
 
+/// IA M-5 미션 건의하기 (Figma 543:891)
 class MissionSuggestViewModel extends ChangeNotifier {
   MissionSuggestViewModel({required CommunityRepository communityRepository})
       : _communityRepository = communityRepository;
 
   final CommunityRepository _communityRepository;
 
-  String programLabel = '환승연애4';
-  String episode = '';
-  String title = '';
-  String description = '';
-  String choiceA = '';
-  String choiceB = '';
-  String choiceC = '';
-  String expectedCloseLabel = '';
-  String resultSource = '';
-  bool isSubmitting = false;
-  String? errorMessage;
-  bool isSuccess = false;
+  static const List<String> categoryOptions = [
+    '연애예능',
+    '서바이벌',
+    '음악',
+    '드라마',
+  ];
+
+  static const int maxChoiceCount = 5;
+  static const int minChoiceCount = 2;
+
+  ProgramEpisodeSelection? _programEpisode;
+  String? _selectedCategory;
+  String _title = '';
+  List<String> _choices = ['', ''];
+  bool _isSubmitting = false;
+  String? _errorMessage;
+  bool _isSuccess = false;
+
+  ProgramEpisodeSelection? get programEpisode => _programEpisode;
+  String? get selectedCategory => _selectedCategory;
+  String get title => _title;
+  List<String> get choices => List.unmodifiable(_choices);
+  bool get isSubmitting => _isSubmitting;
+  String? get errorMessage => _errorMessage;
+  bool get isSuccess => _isSuccess;
+
+  bool get canAddChoice => _choices.length < maxChoiceCount && !_isSubmitting;
+  bool get canRemoveChoice => _choices.length > minChoiceCount;
 
   bool get canSubmit =>
-      title.trim().isNotEmpty &&
-      choiceA.trim().isNotEmpty &&
-      choiceB.trim().isNotEmpty &&
-      !isSubmitting;
+      _programEpisode != null &&
+      _selectedCategory != null &&
+      _title.trim().isNotEmpty &&
+      _choices.length >= minChoiceCount &&
+      _choices.take(minChoiceCount).every((c) => c.trim().isNotEmpty) &&
+      !_isSubmitting;
 
-  void updateProgram(String value) {
-    programLabel = value;
+  bool get hasPartialProgress =>
+      !canSubmit &&
+      (_programEpisode != null ||
+          _selectedCategory != null ||
+          _title.trim().isNotEmpty ||
+          _choices.any((c) => c.trim().isNotEmpty));
+
+  void selectProgramEpisode(ProgramEpisodeSelection value) {
+    _programEpisode = value;
     notifyListeners();
   }
 
-  void updateEpisode(String value) {
-    episode = value;
+  void selectCategory(String category) {
+    if (_selectedCategory == category) {
+      return;
+    }
+    _selectedCategory = category;
     notifyListeners();
   }
 
   void updateTitle(String value) {
-    title = value;
+    _title = value;
     notifyListeners();
   }
 
-  void updateDescription(String value) {
-    description = value;
+  void updateChoice(int index, String value) {
+    if (index < 0 || index >= _choices.length) {
+      return;
+    }
+    _choices = List<String>.from(_choices);
+    _choices[index] = value;
     notifyListeners();
   }
 
-  void updateChoiceA(String value) {
-    choiceA = value;
+  void addChoice() {
+    if (!canAddChoice) {
+      return;
+    }
+    _choices = [..._choices, ''];
     notifyListeners();
   }
 
-  void updateChoiceB(String value) {
-    choiceB = value;
-    notifyListeners();
-  }
-
-  void updateChoiceC(String value) {
-    choiceC = value;
-    notifyListeners();
-  }
-
-  void updateExpectedClose(String value) {
-    expectedCloseLabel = value;
-    notifyListeners();
-  }
-
-  void updateResultSource(String value) {
-    resultSource = value;
+  void removeChoice(int index) {
+    if (!canRemoveChoice || index < minChoiceCount) {
+      return;
+    }
+    _choices = List<String>.from(_choices)..removeAt(index);
     notifyListeners();
   }
 
@@ -75,34 +100,29 @@ class MissionSuggestViewModel extends ChangeNotifier {
     if (!canSubmit) {
       return false;
     }
-    isSubmitting = true;
-    errorMessage = null;
+    _isSubmitting = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
-      final choices = [
-        choiceA.trim(),
-        choiceB.trim(),
-        if (choiceC.trim().isNotEmpty) choiceC.trim(),
-      ];
+      final nonEmpty = _choices
+          .map((c) => c.trim())
+          .where((c) => c.isNotEmpty)
+          .toList();
       await _communityRepository.submitMissionSuggestion(
-        title: title.trim(),
-        programLabel: programLabel,
-        episode: episode.trim(),
-        description: description.trim(),
-        choices: choices,
-        expectedCloseLabel:
-            expectedCloseLabel.trim().isEmpty ? null : expectedCloseLabel.trim(),
-        resultSource:
-            resultSource.trim().isEmpty ? null : resultSource.trim(),
+        title: _title.trim(),
+        programLabel: _programEpisode!.program.title,
+        episode: _programEpisode!.episode.label,
+        description: '',
+        choices: nonEmpty,
       );
-      isSuccess = true;
+      _isSuccess = true;
       return true;
     } catch (_) {
-      errorMessage = '건의 제출에 실패했습니다.';
+      _errorMessage = '건의 제출에 실패했습니다.';
       return false;
     } finally {
-      isSubmitting = false;
+      _isSubmitting = false;
       notifyListeners();
     }
   }

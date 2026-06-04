@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:picktory/core/theme/picktory_decorations.dart';
+import 'package:picktory/core/theme/picktory_spacing.dart';
+import 'package:picktory/core/theme/picktory_typography.dart';
+import 'package:picktory/core/widgets/picktory_badge.dart';
 import 'package:picktory/views/home/home_theme.dart';
 
 class HomeInlineAdBanner extends StatelessWidget {
@@ -8,38 +12,37 @@ class HomeInlineAdBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = HomeTheme.palette;
+    final decorations = PicktoryDecorations(palette);
+    final typography = PicktoryTypography(palette);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.fromLTRB(
+        PicktorySpacing.md,
+        PicktorySpacing.xs,
+        PicktorySpacing.md,
+        PicktorySpacing.md,
+      ),
       child: Container(
-        height: 72,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: HomeTheme.surfaceLight,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        height: 76,
+        padding: const EdgeInsets.all(PicktorySpacing.md),
+        decoration: decorations.adBanner(),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.black45,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text(
-                '광고',
-                style: TextStyle(fontSize: 11, color: Colors.white),
-              ),
+            const PicktoryBadge(
+              label: '광고',
+              variant: PicktoryBadgeVariant.ad,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: PicktorySpacing.sm),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                  color: HomeTheme.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: typography.cardTitle.copyWith(fontSize: 15),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            Icon(Icons.chevron_right_rounded, color: palette.textTertiary),
           ],
         ),
       ),

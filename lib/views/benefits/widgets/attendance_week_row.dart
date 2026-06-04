@@ -13,6 +13,7 @@ class AttendanceWeekRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: slots.map((slot) {
         final completed = slot.status == AttendanceDayStatus.completed;
+        final isToday = slot.status == AttendanceDayStatus.today;
         return Column(
           children: [
             Container(
@@ -24,8 +25,10 @@ class AttendanceWeekRow extends StatelessWidget {
                 border: Border.all(
                   color: completed
                       ? BenefitTheme.primary
-                      : BenefitTheme.cardBorder,
-                  width: completed ? 0 : 1.5,
+                      : isToday
+                          ? BenefitTheme.primary
+                          : BenefitTheme.cardBorder,
+                  width: isToday ? 2 : (completed ? 0 : 1.5),
                 ),
               ),
               child: completed
@@ -37,11 +40,12 @@ class AttendanceWeekRow extends StatelessWidget {
               slot.label,
               style: TextStyle(
                 fontSize: 11,
-                color: completed
+                color: completed || isToday
                     ? BenefitTheme.primary
                     : BenefitTheme.textSecondary,
-                fontWeight:
-                    completed ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: completed || isToday
+                    ? FontWeight.w700
+                    : FontWeight.normal,
               ),
             ),
           ],

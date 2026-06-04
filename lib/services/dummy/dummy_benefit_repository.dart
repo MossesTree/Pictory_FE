@@ -6,7 +6,8 @@ import 'package:picktory/models/mini_game_item.dart';
 import 'package:picktory/services/benefit_repository.dart';
 
 class DummyBenefitRepository implements BenefitRepository {
-  static const int _dailyAdLimit = 5;
+  /// IA B-3 비고: 하루 3회
+  static const int _dailyAdLimit = 3;
   static const int _adRewardPicks = 3;
   static const int _attendanceRewardPicks = 1;
   static const int _weekBonusPicks = 5;
@@ -86,16 +87,28 @@ class DummyBenefitRepository implements BenefitRepository {
     return _adRewardPicks;
   }
 
+  /// IA B-1: 완료/오늘/미래 3가지 상태 노출.
+  /// 오늘 칸은 _checkedInToday 여부와 무관하게 weekProgress 다음 칸(미체크 시)
+  /// 또는 weekProgress 칸(체크 완료 시).
   List<AttendanceDaySlot> _buildWeekSlots() {
+    const labels = ['월', '화', '수', '목', '금', '토', '일'];
+    final todayDay = _checkedInToday ? _weekProgress : _weekProgress + 1;
     return List.generate(7, (index) {
       final day = index + 1;
-      final completed = day <= _weekProgress;
+      final AttendanceDayStatus status;
+      if (day < todayDay) {
+        status = AttendanceDayStatus.completed;
+      } else if (day == todayDay && !_checkedInToday) {
+        status = AttendanceDayStatus.today;
+      } else if (day <= _weekProgress) {
+        status = AttendanceDayStatus.completed;
+      } else {
+        status = AttendanceDayStatus.upcoming;
+      }
       return AttendanceDaySlot(
         dayIndex: day,
-        label: '$day일',
-        status: completed
-            ? AttendanceDayStatus.completed
-            : AttendanceDayStatus.upcoming,
+        label: labels[index],
+        status: status,
       );
     });
   }

@@ -14,33 +14,62 @@ class HomeViewModel extends ChangeNotifier {
   final HomeRepository _homeRepository;
   final UserPreferenceRepository _userPreferenceRepository;
 
-  final String interestSectionTitle = '내 관심 프로그램 미션';
-  final String interestEmptyMessage = '관심 프로그램을 설정해보세요';
+  // IA H-1 텍스트 상수
+  final String pickSectionTitle = '당신의 PICK은?';
+  final String interestEmptyMessage = '해당 조건의 미션이 없습니다';
   final String searchPlaceholder = '프로그램, 미션 검색...';
   final String resultSectionTitle = '결과공개';
+  final String suggestCardTitle = '새 미션 건의하기';
+  final String suggestCardSubtitle = '원하는 미션을 직접 제안해보세요';
 
   HomeFeed _feed = HomeFeed.empty;
-  String _selectedCategory = '전체';
+  String _selectedCategory = 'ALL';
+  String _selectedProgramId = 'all';
   bool _isLoading = false;
   bool _isRefreshing = false;
   String? _errorMessage;
 
   HomeFeed get feed => _feed;
   String get selectedCategory => _selectedCategory;
+  String get selectedProgramId => _selectedProgramId;
 
+  String get displayNickname => '${_feed.nickname}님';
+
+  /// IA H-1 카테고리 탭 + 프로그램 캐러셀 조합 필터링
   List<Mission> get filteredMissions {
-    if (_selectedCategory == '전체') {
-      return _feed.activeMissions;
+    var list = _feed.activeMissions;
+    if (_selectedCategory != 'ALL') {
+      list = list.where((m) => m.category == _selectedCategory).toList();
     }
-    return _feed.activeMissions
-        .where((m) => m.category == _selectedCategory)
-        .toList();
+    if (_selectedProgramId != 'all') {
+      list = list.where(_matchesProgram).toList();
+    }
+    return list;
   }
+
+  bool _matchesProgram(Mission mission) {
+    // Phase 3에서 서버 programId 매핑으로 교체될 임시 매칭
+    switch (_selectedProgramId) {
+      case 'prog-solo':
+        return mission.programLabel.contains('솔로') ||
+            mission.programLabel.contains('나솔');
+      case 'prog-transit':
+        return mission.programLabel.contains('환승');
+      case 'prog-chef':
+        return mission.programLabel.contains('요리사');
+      case 'prog-produce':
+        return mission.programLabel.contains('프로듀');
+      default:
+        return true;
+    }
+  }
+
   bool get isLoading => _isLoading;
   bool get isRefreshing => _isRefreshing;
   String? get errorMessage => _errorMessage;
   bool get hasData =>
       _feed.adBanners.isNotEmpty ||
+      _feed.noticeBanners.isNotEmpty ||
       _feed.heroMissions.isNotEmpty ||
       _feed.activeMissions.isNotEmpty ||
       _feed.results.isNotEmpty;
@@ -59,7 +88,11 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final preference = await _userPreferenceRepository.load();
+      // 독립 요청은 병렬 실행하여 초기 진입 지연을 최소화
+      final results = await Future.wait([
+        _userPreferenceRepository.load(),
+      ]);
+      final preference = results[0];
       _feed = await _homeRepository.fetchFeed(
         programIds: preference.selectedProgramIds,
       );
@@ -79,6 +112,14 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
     _selectedCategory = category;
+    notifyListeners();
+  }
+
+  void selectProgram(String programId) {
+    if (_selectedProgramId == programId) {
+      return;
+    }
+    _selectedProgramId = programId;
     notifyListeners();
   }
 }

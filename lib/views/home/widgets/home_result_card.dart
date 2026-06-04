@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:picktory/core/theme/picktory_spacing.dart';
+import 'package:picktory/core/theme/picktory_typography.dart';
+import 'package:picktory/core/widgets/picktory_badge.dart';
+import 'package:picktory/core/widgets/picktory_surface_card.dart';
 import 'package:picktory/models/mission_result.dart';
 import 'package:picktory/views/home/home_theme.dart';
 
@@ -14,64 +18,73 @@ class HomeResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = HomeTheme.palette;
+    final typography = PicktoryTypography(palette);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: InkWell(
+      padding: const EdgeInsets.symmetric(horizontal: PicktorySpacing.md),
+      child: PicktorySurfaceCard(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: HomeTheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: HomeTheme.surfaceLight),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: HomeTheme.yellow.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text(
-                  '결과공개',
-                  style: TextStyle(
-                    color: HomeTheme.yellow,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
+        radius: 12,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: (result.isCorrect ? palette.success : palette.error)
+                    .withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                result.isCorrect
+                    ? Icons.check_rounded
+                    : Icons.close_rounded,
+                color: result.isCorrect ? palette.success : palette.error,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: PicktorySpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const PicktoryBadge(
+                    label: '결과공개',
+                    variant: PicktoryBadgeVariant.result,
                   ),
-                ),
+                  const SizedBox(height: PicktorySpacing.xs),
+                  Text(
+                    result.programLabel,
+                    style: typography.cardTitle.copyWith(fontSize: 15),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    result.resultLabel,
+                    style: typography.caption.copyWith(
+                      color: result.isCorrect
+                          ? palette.success
+                          : palette.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${result.participantCount}명 참여',
+                    style: typography.caption,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                result.programLabel,
-                style: const TextStyle(
-                  color: HomeTheme.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                result.resultLabel,
-                style: TextStyle(
-                  color: result.isCorrect
-                      ? HomeTheme.correct
-                      : HomeTheme.wrong,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${result.participantCount}명 참여',
-                style: const TextStyle(
-                  color: HomeTheme.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: palette.textTertiary,
+            ),
+          ],
         ),
       ),
     );

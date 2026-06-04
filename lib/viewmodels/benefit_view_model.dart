@@ -19,7 +19,13 @@ class BenefitViewModel extends ChangeNotifier {
   bool get isCheckingIn => _isCheckingIn;
   String? get errorMessage => _errorMessage;
 
-  String get attendanceStreakLabel => '누적 출석 ${_feed.cumulativeAttendanceDays}일 🔥';
+  /// IA B-1: 연속 출석 일수 강조 (2일 이상부터 표시)
+  String? get attendanceStreakLabel {
+    if (_feed.consecutiveDays < 2) {
+      return null;
+    }
+    return '${_feed.consecutiveDays}일 연속 🔥';
+  }
 
   String get checkInButtonLabel =>
       _feed.checkedInToday ? '오늘 출석 완료' : '오늘 출석하기';

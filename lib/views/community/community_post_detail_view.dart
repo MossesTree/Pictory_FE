@@ -20,6 +20,7 @@ class CommunityPostDetailView extends StatefulWidget {
 
 class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
   late final TextEditingController _commentController;
+  final FocusNode _commentFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -31,6 +32,7 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
   @override
   void dispose() {
     _commentController.dispose();
+    _commentFocusNode.dispose();
     super.dispose();
   }
 
@@ -72,6 +74,11 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('딥링크가 클립보드에 복사되었습니다.')),
         );
+      case CommunityPostAction.viewMission:
+        final missionId = post.linkedMissionId;
+        if (missionId != null) {
+          await context.push(AppRoute.missionDetailPath(missionId));
+        }
     }
   }
 
@@ -102,7 +109,13 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
           );
         }
       case CommunityCommentAction.edit:
-        break;
+        // 임시: 입력바에 기존 내용을 채워 재작성 흐름으로 유도
+        _commentController.text = comment.content;
+        _commentController.selection = TextSelection.fromPosition(
+          TextPosition(offset: comment.content.length),
+        );
+        widget.viewModel.updateCommentDraft(comment.content);
+        FocusScope.of(context).requestFocus(_commentFocusNode);
     }
   }
 
@@ -142,6 +155,7 @@ class _CommunityPostDetailViewState extends State<CommunityPostDetailView> {
           bottomNavigationBar: showContent
               ? _CommentInputBar(
                   controller: _commentController,
+                  focusNode: _commentFocusNode,
                   canSubmit: viewModel.canSubmitComment,
                   onChanged: viewModel.updateCommentDraft,
                   onSubmit: _submitComment,
@@ -395,12 +409,14 @@ class _CommentTile extends StatelessWidget {
 class _CommentInputBar extends StatelessWidget {
   const _CommentInputBar({
     required this.controller,
+    required this.focusNode,
     required this.canSubmit,
     required this.onChanged,
     required this.onSubmit,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final bool canSubmit;
   final ValueChanged<String> onChanged;
   final VoidCallback onSubmit;
@@ -424,6 +440,7 @@ class _CommentInputBar extends StatelessWidget {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  focusNode: focusNode,
                   decoration: InputDecoration(
                     hintText: '댓글 작성...',
                     filled: true,

@@ -5,6 +5,7 @@ import 'package:picktory/models/ranking_my_summary.dart';
 import 'package:picktory/models/ranking_period.dart';
 import 'package:picktory/models/ranking_profile_preview.dart';
 import 'package:picktory/models/ranking_rank_change.dart';
+import 'package:picktory/models/special_badge.dart';
 
 class DummyRankingData {
   DummyRankingData._();
@@ -181,47 +182,91 @@ class DummyRankingData {
     return RankingProfilePreview(
       userId: userId,
       nickname: isMe ? currentUserNickname : '메뉴직',
-      subtitle: isMe ? '꼬마토리 2 · 시즌 9위' : '부캐릭터리그 시즌 2위',
-      knowledgePoints: isMe ? 285 : 1820,
-      activityPoints: isMe ? 90 : 4302,
+      tierLabel: isMe ? '꼬마토리 2' : '전설토리 1',
+      tierEmoji: isMe ? '🌱' : '👑',
+      currentRank: isMe ? 12 : 2,
+      seasonPoints: isMe ? 300 : 1820,
+      overallPoints: isMe ? 520 : 12480,
       accuracyPercent: isMe ? 76 : 87,
+      specialBadges: const [
+        SpecialBadge(id: 'b1', label: '열정러', iconEmoji: '🔥', isEarned: true),
+        SpecialBadge(id: 'b2', label: '산책러', iconEmoji: '⚡', isEarned: true),
+        SpecialBadge(
+          id: 'b3',
+          label: '나눔러',
+          iconEmoji: '🚶',
+          isEarned: true,
+        ),
+        SpecialBadge(
+          id: 'b4',
+          label: '클린유저',
+          iconEmoji: '✓',
+          isEarned: false,
+        ),
+      ],
       isCurrentUser: isMe,
     );
   }
 
+  /// IA R-3: 성장 단계 9단계 (알토리 → 전설토리)
+  /// 각 단계는 3레벨로 세분화되나, 메인 맵에서는 9단계 노드로 표시.
   static RankingGrowthRecord growthRecord() => const RankingGrowthRecord(
         currentTierName: '꼬마토리 2',
-        currentPoints: 500,
-        tierMinPoints: 300,
-        tierMaxPoints: 600,
+        currentPoints: 520,
+        tierMinPoints: 400,
+        tierMaxPoints: 800,
         steps: [
           GrowthTierStep(
-            name: '씨앗토리',
+            name: '알토리',
             minPoints: 0,
-            maxPoints: 100,
+            maxPoints: 50,
+            status: GrowthTierStatus.completed,
+          ),
+          GrowthTierStep(
+            name: '씨앗토리',
+            minPoints: 50,
+            maxPoints: 150,
             status: GrowthTierStatus.completed,
           ),
           GrowthTierStep(
             name: '아기토리',
-            minPoints: 100,
-            maxPoints: 300,
+            minPoints: 150,
+            maxPoints: 400,
             status: GrowthTierStatus.completed,
           ),
           GrowthTierStep(
             name: '꼬마토리',
-            minPoints: 300,
-            maxPoints: 600,
+            minPoints: 400,
+            maxPoints: 800,
             status: GrowthTierStatus.inProgress,
           ),
           GrowthTierStep(
             name: '사춘기토리',
-            minPoints: 600,
-            maxPoints: 1000,
+            minPoints: 800,
+            maxPoints: 1500,
             status: GrowthTierStatus.locked,
           ),
           GrowthTierStep(
             name: '어른토리',
-            minPoints: 1000,
+            minPoints: 1500,
+            maxPoints: 3000,
+            status: GrowthTierStatus.locked,
+          ),
+          GrowthTierStep(
+            name: '명예토리',
+            minPoints: 3000,
+            maxPoints: 6000,
+            status: GrowthTierStatus.locked,
+          ),
+          GrowthTierStep(
+            name: '대장토리',
+            minPoints: 6000,
+            maxPoints: 12000,
+            status: GrowthTierStatus.locked,
+          ),
+          GrowthTierStep(
+            name: '전설토리',
+            minPoints: 12000,
             maxPoints: null,
             status: GrowthTierStatus.locked,
           ),

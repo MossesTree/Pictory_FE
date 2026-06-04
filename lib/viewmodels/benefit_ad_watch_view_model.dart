@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 class BenefitAdWatchViewModel extends ChangeNotifier {
+  /// IA B-4: 데모 단축 (12초 시청 / 5초 후 스킵)
   BenefitAdWatchViewModel({
-    this.totalDurationSeconds = 70,
-    this.skipAvailableAfterSeconds = 64,
+    this.totalDurationSeconds = 12,
+    this.skipAvailableAfterSeconds = 5,
     this.rewardPicks = 3,
   });
 

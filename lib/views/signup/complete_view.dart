@@ -55,6 +55,7 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> {
                     ),
                   ),
                   const SizedBox(height: 28),
+                  // IA O-6: 가입 보상 100 Pick / 초대코드 보너스는 조건부 표시
                   Row(
                     children: [
                       Expanded(
@@ -63,24 +64,24 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> {
                           label: '가입 보상',
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text('+', style: TextStyle(fontSize: 20)),
-                      ),
-                      Expanded(
-                        child: _CoinCard(
-                          amount: viewModel.bonusCoins > 0
-                              ? '+${viewModel.bonusCoins}'
-                              : '+0',
-                          label: '초대코드 보너스',
-                          highlight: viewModel.bonusCoins > 0,
+                      if (viewModel.bonusCoins > 0) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Text('+', style: TextStyle(fontSize: 20)),
                         ),
-                      ),
+                        Expanded(
+                          child: _CoinCard(
+                            amount: '+${viewModel.bonusCoins}',
+                            label: '초대코드 보너스',
+                            highlight: true,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '총 ${viewModel.totalCoins}코인 지급 완료! 🎁',
+                    '총 ${viewModel.totalCoins} Pick 지급 완료! 🎁',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

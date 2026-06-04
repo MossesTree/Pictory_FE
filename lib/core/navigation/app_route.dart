@@ -26,13 +26,19 @@ enum AppRoute {
   missionDetail('/mission/:id'),
   missionResult('/mission/:id/result'),
   missionShare('/mission/:id/share'),
+  missionShareComplete('/mission/:id/share/complete'),
   notifications('/notifications'),
   myPickHistory('/my/pick-history'),
   myCommunityActivity('/my/community-activity'),
   myBadges('/my/badges'),
   myInterestedPrograms('/my/interested-programs'),
+  benefitsMiniGames('/benefits/mini-games'),
   settings('/settings'),
-  notificationSettings('/settings/notifications');
+  notificationSettings('/settings/notifications'),
+  settingsNotices('/settings/notices'),
+  settingsInquiry('/settings/inquiry'),
+  settingsTerms('/settings/terms'),
+  settingsPrivacy('/settings/privacy');
 
   const AppRoute(this.path);
 
@@ -45,6 +51,9 @@ enum AppRoute {
   static String missionResultPath(String id) => '/mission/$id/result';
 
   static String missionSharePath(String id) => '/mission/$id/share';
+
+  static String missionShareCompletePath(String id) =>
+      '/mission/$id/share/complete';
 
   static String communityPostPath(String id) => '/community/post/$id';
 

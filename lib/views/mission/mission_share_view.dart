@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:picktory/app/di/service_locator.dart';
+import 'package:picktory/core/navigation/app_route.dart';
+import 'package:picktory/core/theme/picktory_spacing.dart';
+import 'package:picktory/core/widgets/picktory_async_state.dart';
+import 'package:picktory/core/widgets/program_episode_picker.dart';
 import 'package:picktory/viewmodels/mission_share_view_model.dart';
-import 'package:picktory/views/home/home_theme.dart';
-import 'package:picktory/views/mission/widgets/mission_scaffold.dart';
-import 'package:picktory/views/mission/widgets/mission_yellow_button.dart';
+import 'package:picktory/views/mission/mission_theme.dart';
+import 'package:picktory/views/mission/widgets/mission_form_widgets.dart';
 
+/// IA M-4 스레드에 공유 (Figma 549:1338)
 class MissionShareView extends StatefulWidget {
   const MissionShareView({super.key, required this.viewModel});
 
@@ -16,11 +21,19 @@ class MissionShareView extends StatefulWidget {
 
 class _MissionShareViewState extends State<MissionShareView> {
   MissionShareViewModel get viewModel => widget.viewModel;
+  late final TextEditingController _contentController;
 
   @override
   void initState() {
     super.initState();
+    _contentController = TextEditingController();
     viewModel.load();
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
   }
 
   Future<void> _submit() async {
@@ -28,7 +41,9 @@ class _MissionShareViewState extends State<MissionShareView> {
     if (!mounted || !ok) {
       return;
     }
-    context.pop();
+    context.pushReplacement(
+      AppRoute.missionShareCompletePath(viewModel.missionId),
+    );
   }
 
   @override
@@ -36,101 +51,75 @@ class _MissionShareViewState extends State<MissionShareView> {
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, _) {
-        final result = viewModel.result;
-
-        return MissionScaffold(
-          title: '스레드에 공유',
-          bottom: SafeArea(
+        return Scaffold(
+          backgroundColor: MissionTheme.background,
+          appBar: const MissionFormAppBar(title: '스레드에 공유'),
+          bottomNavigationBar: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: MissionYellowButton(
-                label: '스레드에 생성하기',
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: MissionFormSubmitButton(
+                label: viewModel.isSubmitting
+                    ? '공유 중...'
+                    : '스레드에 공유하기',
                 enabled: viewModel.canSubmit,
+                partial: viewModel.hasPartialProgress,
+                isLoading: viewModel.isSubmitting,
                 onPressed: _submit,
               ),
             ),
           ),
           body: viewModel.isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? PicktoryAsyncState.loading()
               : ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                   children: [
-                    if (result != null)
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: HomeTheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              result.title,
-                              style: const TextStyle(
-                                color: HomeTheme.textPrimary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '내 선택: ${result.userChoice.label}',
-                              style: const TextStyle(
-                                color: HomeTheme.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-                    TextField(
+                    if (viewModel.mission != null)
+                      MissionShareHeroCard(mission: viewModel.mission!),
+                    const SizedBox(height: PicktorySpacing.lg),
+                    const MissionFormSectionLabel(
+                      label: '카테고리',
+                      isRequired: true,
+                    ),
+                    const SizedBox(height: 8),
+                    MissionCategoryChips(
+                      options: MissionShareViewModel.categoryOptions,
+                      selected: viewModel.selectedCategory,
+                      onSelected: viewModel.selectCategory,
+                    ),
+                    const SizedBox(height: PicktorySpacing.lg),
+                    const MissionFormSectionLabel(
+                      label: '프로그램 · 회차',
+                      isRequired: true,
+                    ),
+                    const SizedBox(height: 8),
+                    ProgramEpisodePickerSplit(
+                      selection: viewModel.programEpisode,
+                      tvProgramRepository:
+                          ServiceLocator.instance.tvProgramRepository,
+                      onChanged: viewModel.selectProgramEpisode,
+                    ),
+                    const SizedBox(height: PicktorySpacing.lg),
+                    const MissionFormSectionLabel(
+                      label: '내용',
+                      isRequired: true,
+                    ),
+                    const SizedBox(height: 8),
+                    MissionOutlineTextField(
+                      controller: _contentController,
+                      hintText: '내 의견에 대한 건의를 공유해보세요!',
                       onChanged: viewModel.updateContent,
                       maxLines: 5,
-                      style: const TextStyle(color: HomeTheme.textPrimary),
-                      decoration: InputDecoration(
-                        hintText: '이곳에 공유하고 싶은 생각을 적어주세요...',
-                        hintStyle: const TextStyle(
-                          color: HomeTheme.textSecondary,
-                        ),
-                        filled: true,
-                        fillColor: HomeTheme.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                      maxLength: MissionShareViewModel.maxContentLength,
+                      counterText:
+                          '${viewModel.contentLength}/${MissionShareViewModel.maxContentLength}',
                     ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      initialValue: viewModel.category,
-                      dropdownColor: HomeTheme.surface,
-                      style: const TextStyle(color: HomeTheme.textPrimary),
-                      decoration: InputDecoration(
-                        labelText: '카테고리',
-                        labelStyle: const TextStyle(
-                          color: HomeTheme.textSecondary,
-                        ),
-                        filled: true,
-                        fillColor: HomeTheme.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
+                    if (viewModel.errorMessage != null) ...[
+                      const SizedBox(height: PicktorySpacing.sm),
+                      Text(
+                        viewModel.errorMessage!,
+                        style: const TextStyle(color: MissionTheme.countdown),
                       ),
-                      items: viewModel.categories
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c,
-                              child: Text(c),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          viewModel.updateCategory(value);
-                        }
-                      },
-                    ),
+                    ],
                   ],
                 ),
         );

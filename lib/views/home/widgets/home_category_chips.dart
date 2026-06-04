@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:picktory/core/theme/picktory_spacing.dart';
 import 'package:picktory/views/home/home_theme.dart';
 
 class HomeCategoryChips extends StatelessWidget {
@@ -16,31 +17,68 @@ class HomeCategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: 44,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: PicktorySpacing.md),
         itemCount: categories.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = category == selected;
-          return FilterChip(
-            label: Text(category),
-            selected: isSelected,
-            onSelected: (_) => onSelected(category),
-            backgroundColor: HomeTheme.surface,
-            selectedColor: HomeTheme.yellow,
-            labelStyle: TextStyle(
-              color: isSelected ? Colors.black : HomeTheme.textPrimary,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            ),
-            side: BorderSide(
-              color: isSelected ? HomeTheme.yellow : HomeTheme.surfaceLight,
-            ),
-            showCheckmark: false,
+          return _CategoryChip(
+            label: category,
+            isSelected: isSelected,
+            onTap: () => onSelected(category),
           );
         },
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? HomeTheme.surface : HomeTheme.surfaceMuted,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? HomeTheme.chipSelectedBorder
+                  : Colors.transparent,
+              width: 1.5,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected
+                  ? HomeTheme.chipSelectedText
+                  : HomeTheme.textPrimary,
+            ),
+          ),
+        ),
       ),
     );
   }

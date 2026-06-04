@@ -13,10 +13,11 @@ class NotificationViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  List<AppNotification> get items => _items;
+  List<AppNotification> get items => List.unmodifiable(_items);
   bool get isLoading => _isLoading;
   bool get isEmpty => !_isLoading && _items.isEmpty;
   String? get errorMessage => _errorMessage;
+  int get unreadCount => _items.where((n) => !n.isRead).length;
 
   Future<void> load() async {
     _isLoading = true;
@@ -30,6 +31,22 @@ class NotificationViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// IA N-1 알림 탭 시 즉시 읽음 처리 (낙관적 업데이트)
+  Future<void> markAsRead(String notificationId) async {
+    final index = _items.indexWhere((n) => n.id == notificationId);
+    if (index < 0 || _items[index].isRead) {
+      return;
+    }
+    _items = List<AppNotification>.from(_items)
+      ..[index] = _items[index].copyWith(isRead: true);
+    notifyListeners();
+    try {
+      await _notificationRepository.markAsRead(notificationId);
+    } catch (_) {
+      // 실패 시 silent — 사용자 흐름을 막지 않음
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:picktory/models/tv_program.dart';
+import 'package:picktory/models/tv_program_episode.dart';
 import 'package:picktory/services/dummy/dummy_data_provider.dart';
 import 'package:picktory/services/tv_program_repository.dart';
 
@@ -28,5 +29,21 @@ class DummyTvProgramRepository implements TvProgramRepository {
     }
 
     return results;
+  }
+
+  @override
+  Future<List<TvProgramEpisode>> fetchEpisodes({
+    required String programId,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    // 더미: 프로그램당 1~12화 생성. 서버 연동 시 실제 회차 응답으로 교체
+    return List<TvProgramEpisode>.generate(
+      12,
+      (index) => TvProgramEpisode(
+        id: '$programId-ep-${index + 1}',
+        programId: programId,
+        label: '${index + 1}화',
+      ),
+    );
   }
 }

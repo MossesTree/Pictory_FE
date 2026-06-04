@@ -1,6 +1,7 @@
 import 'package:picktory/models/community_category.dart';
 import 'package:picktory/models/community_comment.dart';
 import 'package:picktory/models/community_post.dart';
+import 'package:picktory/models/community_post_kind.dart';
 import 'package:picktory/models/report_reason.dart';
 import 'package:picktory/models/user_mission.dart';
 
@@ -87,4 +88,31 @@ abstract class CommunityRepository {
     String? deadlineLabel,
     int pointCost,
   });
+
+  /// IA C-5 통합 글 작성
+  /// - [kind] 에 따라 내부적으로 thread/userMission/userPoll 분기
+  /// - 반환 타입은 글 종류별 ID 식별자만 담은 [ComposeSubmitResult]
+  Future<ComposeSubmitResult> submitCompose({
+    required CommunityPostKind kind,
+    required String category,
+    required String programLabel,
+    required String episode,
+    required List<String> imageAssetIds,
+    String title = '',
+    String content = '',
+    List<String> choices = const [],
+    String? deadlineLabel,
+    bool showNickname = true,
+  });
+}
+
+/// IA C-5 통합 글 작성 결과
+class ComposeSubmitResult {
+  const ComposeSubmitResult({
+    required this.kind,
+    required this.id,
+  });
+
+  final CommunityPostKind kind;
+  final String id;
 }

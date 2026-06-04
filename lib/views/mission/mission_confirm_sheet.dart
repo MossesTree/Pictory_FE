@@ -1,84 +1,126 @@
 import 'package:flutter/material.dart';
-import 'package:picktory/views/home/home_theme.dart';
+import 'package:picktory/views/mission/mission_theme.dart';
 import 'package:picktory/views/mission/widgets/mission_yellow_button.dart';
 
+/// IA M-1 선택 확인 모달 (Figma 미션 상세 팝업)
 class MissionConfirmSheet extends StatelessWidget {
   const MissionConfirmSheet({
     super.key,
     required this.selectedLabel,
-    required this.notifyOnResult,
-    required this.onNotifyChanged,
+    required this.pointCost,
     required this.onShare,
     required this.onHome,
     this.isSubmitting = false,
   });
 
   final String selectedLabel;
-  final bool notifyOnResult;
-  final ValueChanged<bool> onNotifyChanged;
+  final int pointCost;
   final VoidCallback onShare;
   final VoidCallback onHome;
   final bool isSubmitting;
 
+  static Future<void> show(
+    BuildContext context, {
+    required String selectedLabel,
+    required int pointCost,
+    required VoidCallback onShare,
+    required VoidCallback onHome,
+    bool isSubmitting = false,
+  }) {
+    return showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (dialogContext) {
+        return MissionConfirmSheet(
+          selectedLabel: selectedLabel,
+          pointCost: pointCost,
+          isSubmitting: isSubmitting,
+          onShare: () {
+            Navigator.of(dialogContext).pop();
+            onShare();
+          },
+          onHome: () {
+            Navigator.of(dialogContext).pop();
+            onHome();
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-      decoration: const BoxDecoration(
-        color: HomeTheme.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: HomeTheme.surfaceLight,
-              borderRadius: BorderRadius.circular(2),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+        decoration: BoxDecoration(
+          color: MissionTheme.surface,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: MissionTheme.badgeFill,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_rounded,
+                color: MissionTheme.primary,
+                size: 30,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          const Icon(Icons.check_circle, color: HomeTheme.yellow, size: 48),
-          const SizedBox(height: 12),
-          Text(
-            "'$selectedLabel'를 선택했어요!",
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: HomeTheme.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+            const SizedBox(height: 16),
+            Text(
+              "'$selectedLabel'를 선택했어요!",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: MissionTheme.textPrimary,
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                height: 1.3,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  '결과 알림 받기',
-                  style: TextStyle(color: HomeTheme.textPrimary),
+            const SizedBox(height: 8),
+            Text(
+              '$pointCost Pick이 사용되었어요',
+              style: const TextStyle(
+                color: MissionTheme.textSecondary,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton(
+                onPressed: isSubmitting ? null : onHome,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: MissionTheme.primary,
+                  side: const BorderSide(color: MissionTheme.primary, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '홈으로 돌아가기',
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
-              Switch(
-                value: notifyOnResult,
-                onChanged: isSubmitting ? null : onNotifyChanged,
-                activeTrackColor: HomeTheme.yellow.withValues(alpha: 0.4),
-                activeThumbColor: HomeTheme.yellow,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          MissionYellowButton(
-            label: '스레드에 공유하기',
-            onPressed: isSubmitting ? null : onShare,
-          ),
-          const SizedBox(height: 8),
-          MissionYellowButton(
-            label: '홈으로 돌아가기',
-            onPressed: isSubmitting ? null : onHome,
-          ),
-        ],
+            ),
+            const SizedBox(height: 10),
+            MissionYellowButton(
+              label: '스레드에 공유하기',
+              enabled: !isSubmitting,
+              onPressed: isSubmitting ? null : onShare,
+            ),
+          ],
+        ),
       ),
     );
   }

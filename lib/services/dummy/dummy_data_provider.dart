@@ -1,6 +1,7 @@
 import 'package:picktory/models/ad_banner.dart';
 import 'package:picktory/models/gender.dart';
 import 'package:picktory/models/genre.dart';
+import 'package:picktory/models/notice_banner.dart';
 import 'package:picktory/models/user_profile.dart';
 import 'package:picktory/models/mission.dart';
 import 'package:picktory/models/mission_choice.dart';
@@ -20,15 +21,32 @@ class DummyDataProvider {
     isOnboardingCompleted: true,
   );
 
+  static const List<NoticeBanner> noticeBanners = [
+    NoticeBanner(
+      id: 'notice-pick',
+      title: 'Pick이 부족하신가요?',
+      subtitle: '광고 보고 Pick 충전하기',
+      emoji: '🎁',
+      action: NoticeBannerAction.pickRecharge,
+    ),
+    NoticeBanner(
+      id: 'notice-event-1',
+      title: '시즌 1 랭킹 이벤트 진행 중',
+      subtitle: '1등에게 100,000 Pick 지급',
+      emoji: '🏆',
+      action: NoticeBannerAction.event,
+    ),
+  ];
+
   static const List<AdBanner> adBanners = [
     AdBanner(
       id: 'ad-1',
-      title: '브랜드 광고 배너',
+      title: '제주로 떠나는 워케이션',
       subtitle: '클릭 시 외부 링크 이동',
     ),
     AdBanner(
       id: 'ad-2',
-      title: '브랜드 광고 배너',
+      title: '제주로 떠나는 워케이션',
       subtitle: '클릭 시 외부 링크 이동',
     ),
   ];
@@ -37,12 +55,30 @@ class DummyDataProvider {
     Mission(
       id: 'mission-hero-1',
       programLabel: '환승연애4 5회',
-      title: '마지막 커플은 누구?',
-      pointCost: 10,
+      title: '마지막 커플은?',
+      pointCost: 30,
       remainingLabel: '02:34:12',
-      participantCount: 4321,
+      participantCount: 4821,
       isUrgent: true,
-      category: '예능',
+      category: '연애',
+    ),
+    Mission(
+      id: 'mission-hero-2',
+      programLabel: '나솔16기 10회',
+      title: '오늘의 커플 예측',
+      pointCost: 30,
+      remainingLabel: '11:22:00',
+      participantCount: 2341,
+      category: '연애',
+    ),
+    Mission(
+      id: 'mission-hero-3',
+      programLabel: '흑백요리사2',
+      title: '최종 우승자는?',
+      pointCost: 30,
+      remainingLabel: '1일 05:00',
+      participantCount: 1890,
+      category: '서바이벌',
     ),
   ];
 
@@ -50,11 +86,11 @@ class DummyDataProvider {
     Mission(
       id: 'mission-1',
       programLabel: '나솔16기 10회',
-      title: '최종 커플은?',
+      title: '오늘의 커플 예측 참여하기',
       pointCost: 10,
       remainingLabel: '11:22:00',
       participantCount: 2341,
-      category: '예능',
+      category: '연애',
       choices: [
         MissionChoice(id: 'a', label: 'A. 상철 & 현숙'),
         MissionChoice(id: 'b', label: 'B. 영철 & 영자'),
@@ -67,7 +103,7 @@ class DummyDataProvider {
       pointCost: 10,
       remainingLabel: '02:34:12',
       participantCount: 4321,
-      category: '예능',
+      category: '연애',
       choices: [
         MissionChoice(id: 'a', label: 'A. 수지 & 민호'),
         MissionChoice(id: 'b', label: 'B. 민희 & 태환'),
@@ -80,10 +116,23 @@ class DummyDataProvider {
       pointCost: 10,
       remainingLabel: '1일 05:00',
       participantCount: 1890,
-      category: '예능',
+      category: '서바이벌',
       choices: [
         MissionChoice(id: 'a', label: 'A. 백수저'),
         MissionChoice(id: 'b', label: 'B. 흑수저'),
+      ],
+    ),
+    Mission(
+      id: 'mission-4',
+      programLabel: '프로듀스101 6회',
+      title: '1위 데뷔 멤버 예측',
+      pointCost: 10,
+      remainingLabel: '03:10:00',
+      participantCount: 5210,
+      category: '음악',
+      choices: [
+        MissionChoice(id: 'a', label: 'A. 김하준'),
+        MissionChoice(id: 'b', label: 'B. 박지호'),
       ],
     ),
   ];

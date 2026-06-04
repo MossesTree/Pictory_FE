@@ -113,6 +113,31 @@ class ProfileSetupView extends StatelessWidget {
                 keyboardType: TextInputType.datetime,
                 onChanged: viewModel.updateBirthDate,
               ),
+              const SizedBox(height: 24),
+
+              // IA O-4: 친구 초대코드 (선택) — 같은 화면에 포함
+              const Text(
+                '친구 초대코드 (선택)',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                '입력 시 가입 완료 후 +100 Pick 추가 지급',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: OnboardingTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                decoration: InputDecoration(
+                  hintText: '코드 5자리 입력 (대문자/숫자)',
+                  errorText: viewModel.inviteErrorMessage,
+                ),
+                textCapitalization: TextCapitalization.characters,
+                maxLength: 5,
+                onChanged: viewModel.updateInviteCode,
+              ),
               if (viewModel.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),

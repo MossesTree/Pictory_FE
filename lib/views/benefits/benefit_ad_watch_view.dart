@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picktory/viewmodels/benefit_ad_watch_view_model.dart';
 import 'package:picktory/views/benefits/benefit_theme.dart';
-import 'package:picktory/views/shell/app_bottom_nav_bar.dart';
-import 'package:picktory/views/shell/main_tab.dart';
 
 class BenefitAdWatchView extends StatefulWidget {
   const BenefitAdWatchView({
@@ -160,13 +158,7 @@ class _BenefitAdWatchViewState extends State<BenefitAdWatchView> {
                     ],
                   ),
                 ),
-                Opacity(
-                  opacity: 0.35,
-                  child: AppBottomNavBar(
-                    currentTab: MainTab.benefits,
-                    onTabSelected: (_) {},
-                  ),
-                ),
+                const SizedBox(height: 24),
               ],
             ),
           ),

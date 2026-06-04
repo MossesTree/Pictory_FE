@@ -1,3 +1,4 @@
+import 'package:picktory/models/community_post_kind.dart';
 import 'package:picktory/models/my_community_activity.dart';
 import 'package:picktory/models/my_page_summary.dart';
 import 'package:picktory/models/notification_settings.dart';
@@ -15,38 +16,39 @@ class DummyMyRepository implements MyRepository {
 
   NotificationSettings _notificationSettings = const NotificationSettings();
 
+  /// IA MY-2: 미션 픽 기록 (정답/오답/대기)
   static const _pickHistory = [
     PickHistoryItem(
       id: 'ph-1',
+      missionId: 'm-101',
       title: '환승연애4 5회 마지막 커플',
       timeLabel: '05.14 10:30',
       points: 120,
-      type: PickHistoryType.mission,
-      isCompleted: true,
+      result: PickHistoryResult.correct,
     ),
     PickHistoryItem(
       id: 'ph-2',
-      title: '스레드 공유 보상',
+      missionId: 'm-102',
+      title: '나는솔로 10기 최종 커플',
       timeLabel: '05.13 18:20',
-      points: 10,
-      type: PickHistoryType.community,
-      isCompleted: true,
+      points: 80,
+      result: PickHistoryResult.correct,
     ),
     PickHistoryItem(
       id: 'ph-3',
-      title: '출석 체크',
+      missionId: 'm-103',
+      title: '피지컬:100 우승자 예측',
       timeLabel: '05.12 09:00',
-      points: 5,
-      type: PickHistoryType.other,
-      isCompleted: true,
+      points: 0,
+      result: PickHistoryResult.incorrect,
     ),
     PickHistoryItem(
       id: 'ph-4',
-      title: '나는솔로 10기 최종 커플',
+      missionId: 'm-104',
+      title: '아이돌 서바이벌 TOP3',
       timeLabel: '05.10 21:15',
-      points: 80,
-      type: PickHistoryType.mission,
-      isCompleted: true,
+      points: 0,
+      result: PickHistoryResult.pending,
     ),
   ];
 
@@ -58,12 +60,15 @@ class DummyMyRepository implements MyRepository {
     return MyPageSummary(
       nickname: nickname,
       tierLabel: '프리티어 2',
+      tierEmoji: '🌱',
+      tierProgress: 0.42,
+      seasonRanking: 24,
       totalRanking: 9,
       communityRanking: 12,
-      missionRanking: 7,
-      accumulatedPoints: 12,
+      accumulatedPoints: 12480,
       currentPoints: 520,
       ticketCount: 2,
+      inviteCode: 'PCK4F2X',
     );
   }
 
@@ -90,13 +95,13 @@ class DummyMyRepository implements MyRepository {
     if (filter == PickHistoryFilter.all) {
       return _pickHistory;
     }
-    final type = switch (filter) {
-      PickHistoryFilter.mission => PickHistoryType.mission,
-      PickHistoryFilter.community => PickHistoryType.community,
-      PickHistoryFilter.other => PickHistoryType.other,
-      PickHistoryFilter.all => PickHistoryType.mission,
+    final target = switch (filter) {
+      PickHistoryFilter.correct => PickHistoryResult.correct,
+      PickHistoryFilter.incorrect => PickHistoryResult.incorrect,
+      PickHistoryFilter.pending => PickHistoryResult.pending,
+      PickHistoryFilter.all => PickHistoryResult.correct,
     };
-    return _pickHistory.where((item) => item.type == type).toList();
+    return _pickHistory.where((item) => item.result == target).toList();
   }
 
   @override
@@ -109,6 +114,7 @@ class DummyMyRepository implements MyRepository {
         timeLabel: '5시간 전',
         likeCount: 18,
         commentCount: 3,
+        kind: CommunityPostKind.userMission,
       ),
       MyCommunityPostItem(
         id: 'post-mine-1',
@@ -116,6 +122,15 @@ class DummyMyRepository implements MyRepository {
         timeLabel: '어제',
         likeCount: 7,
         commentCount: 2,
+        kind: CommunityPostKind.thread,
+      ),
+      MyCommunityPostItem(
+        id: 'post-mine-2',
+        title: '인기 솔로 시즌 우승자 예측',
+        timeLabel: '2일 전',
+        likeCount: 21,
+        commentCount: 9,
+        kind: CommunityPostKind.userPoll,
       ),
     ];
   }
@@ -126,6 +141,7 @@ class DummyMyRepository implements MyRepository {
     return const [
       MyCommunityCommentItem(
         id: 'cmt-3',
+        postId: 'post-3',
         postTitle: '5화 봤어요?? 수지 선택 예상했는데...',
         content: '결과 나오면 공유할게요',
         timeLabel: '1시간 전',
@@ -133,6 +149,7 @@ class DummyMyRepository implements MyRepository {
       ),
       MyCommunityCommentItem(
         id: 'cmt-2',
+        postId: 'post-4',
         postTitle: '5화 마지막 커플 예측',
         content: '현준 라인 설득력 있네요',
         timeLabel: '30분 전',

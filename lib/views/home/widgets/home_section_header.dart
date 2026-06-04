@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:picktory/core/widgets/picktory_section_header.dart';
+import 'package:picktory/views/home/home_theme.dart';
 
+/// 홈 섹션 타이틀 — [PicktorySectionHeader] 래퍼
 class HomeSectionHeader extends StatelessWidget {
   const HomeSectionHeader({
     super.key,
@@ -16,26 +19,11 @@ class HomeSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: titleColor,
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-          ),
-          if (actionLabel != null)
-            TextButton(
-              onPressed: onActionTap,
-              child: Text(actionLabel!),
-            ),
-        ],
-      ),
+    return PicktorySectionHeader(
+      title: title,
+      palette: HomeTheme.palette,
+      actionLabel: actionLabel,
+      onActionTap: onActionTap,
     );
   }
 }

@@ -175,6 +175,15 @@ class _UserMissionDetailViewState extends State<UserMissionDetailView> {
                 ),
               ],
               const SizedBox(height: 24),
+              // IA UM-4 → C-2: 이 미션과 연결된 스레드로 이동
+              _RelatedThreadCard(
+                onTap: () => context.push(
+                  AppRoute.communityPostPath(
+                    viewModel.relatedPostId,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
                   context.push(
@@ -347,6 +356,68 @@ class _PollResultBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RelatedThreadCard extends StatelessWidget {
+  const _RelatedThreadCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: CommunityTheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: CommunityTheme.border),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.forum_outlined,
+                size: 18,
+                color: CommunityTheme.yellow,
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '관련 스레드 보기',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: CommunityTheme.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '같은 미션에 대한 사용자들의 의견을 확인하세요',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CommunityTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: CommunityTheme.textSecondary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

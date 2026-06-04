@@ -12,6 +12,8 @@ import 'package:picktory/views/community/widgets/community_category_carousel.dar
 import 'package:picktory/views/community/widgets/community_main_tabs.dart';
 import 'package:picktory/views/community/widgets/community_post_card.dart';
 import 'package:picktory/views/community/widgets/user_mission_card.dart';
+import 'package:picktory/views/search/picktory_search_sheet.dart';
+import 'package:picktory/views/shell/shell_theme.dart';
 
 class CommunityFeedView extends StatefulWidget {
   const CommunityFeedView({super.key, required this.viewModel});
@@ -75,6 +77,28 @@ class _CommunityFeedViewState extends State<CommunityFeedView>
     widget.viewModel.refresh();
   }
 
+  void _openSearch() {
+    PicktorySearchSheet.show(
+      context,
+      placeholder: '커뮤니티 글, 미션 검색...',
+    );
+  }
+
+  Future<void> _openFeedMore() async {
+    final action = await showCommunityFeedMoreSheet(context);
+    if (!mounted || action == null) {
+      return;
+    }
+    switch (action) {
+      case CommunityFeedMoreAction.refresh:
+        widget.viewModel.refresh();
+      case CommunityFeedMoreAction.notifications:
+        await context.push(AppRoute.notifications.path);
+      case CommunityFeedMoreAction.notice:
+        await context.push(AppRoute.settingsNotices.path);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = widget.viewModel;
@@ -102,11 +126,11 @@ class _CommunityFeedViewState extends State<CommunityFeedView>
                           ),
                           const Spacer(),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: _openSearch,
                             icon: const Icon(Icons.search),
                           ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: _openFeedMore,
                             icon: const Icon(Icons.more_vert),
                           ),
                         ],
@@ -146,7 +170,7 @@ class _CommunityFeedViewState extends State<CommunityFeedView>
                 ),
                 Positioned(
                   right: 16,
-                  bottom: 16,
+                  bottom: ShellTheme.scrollBottomPadding(context) - 20,
                   child: FloatingActionButton(
                     backgroundColor: CommunityTheme.fab,
                     foregroundColor: Colors.white,
@@ -225,6 +249,11 @@ class _CommunityFeedViewState extends State<CommunityFeedView>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('딥링크가 클립보드에 복사되었습니다.')),
         );
+      case CommunityPostAction.viewMission:
+        final missionId = post.linkedMissionId;
+        if (missionId != null) {
+          await context.push(AppRoute.missionDetailPath(missionId));
+        }
     }
     widget.viewModel.refresh();
   }
