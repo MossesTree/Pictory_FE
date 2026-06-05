@@ -54,14 +54,17 @@ class _MissionDetailViewState extends State<MissionDetailView> {
       return;
     }
 
+    final mission = viewModel.detail!.mission;
+    final userBalance = viewModel.detail!.totalPointPool;
+
     await MissionConfirmSheet.show(
       context,
       selectedLabel: label,
-      pointCost: viewModel.detail!.mission.pointCost,
+      pointCost: mission.pointCost,
+      balanceAfter: (userBalance - mission.pointCost).clamp(0, userBalance),
+      participantCount: mission.participantCount,
       isSubmitting: viewModel.isSubmitting,
-      onShare: () => context.push(
-        AppRoute.missionSharePath(viewModel.detail!.mission.id),
-      ),
+      onShare: () => context.push(AppRoute.missionSharePath(mission.id)),
       onHome: () => context.go(AppRoute.home.path),
     );
   }
